@@ -78,6 +78,18 @@ while true; do
 done
 
 create_file "#/bin/sh
+# if != '', print log to this file
+${Prefix}to_file=''
+# you can override how to write log to file
+function ${Prefix}write_file
+{
+    echo \"\$1\" >> \"\$${Prefix}to_file\"
+}
+# call after log to stdout, you can override it
+function ${Prefix}after_stdout
+{
+    return 0
+}
 
 # if != '', print log tag
 ${Prefix}flag_tag='[DEFAULT]'
@@ -159,6 +171,11 @@ function _${Prefix}print
         fi
     fi
 
+    if [ \"\$${Prefix}to_file\" != '' ];then
+        ${Prefix}write_file \"\$s \$_${Prefix}tag \$caller1\$@\"
+        return \$?
+    fi
+
     case \"\$${Prefix}color\" in
         1)
             echo -n \"\$s\"
@@ -179,9 +196,10 @@ function _${Prefix}print
             echo -en \"\\e[0m\"
         ;;
         *)
-            echo \"\$s \$_${Prefix}tag $caller1\$@\"
+            echo \"\$s \$_${Prefix}tag \$caller1\$@\"
         ;;
     esac
+    ${Prefix}after_stdout \"\$s \$_${Prefix}tag \$caller1\$@\"
 }
 
 # trace(... any)

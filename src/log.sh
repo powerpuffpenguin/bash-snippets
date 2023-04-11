@@ -1,4 +1,16 @@
 #/bin/sh
+# if != '', print log to this file
+log_to_file=''
+# you can override how to write log to file
+function log_write_file
+{
+    echo "$1" >> "$log_to_file"
+}
+# call after log to stdout, you can override it
+function log_after_stdout
+{
+    return 0
+}
 
 # if != '', print log tag
 log_flag_tag='[DEFAULT]'
@@ -80,6 +92,11 @@ function _log_print
         fi
     fi
 
+    if [ "$log_to_file" != '' ];then
+        log_write_file "$s $_log_tag $caller1$@"
+        return $?
+    fi
+
     case "$log_color" in
         1)
             echo -n "$s"
@@ -100,9 +117,10 @@ function _log_print
             echo -en "\e[0m"
         ;;
         *)
-            echo "$s $_log_tag $@"
+            echo "$s $_log_tag $caller1$@"
         ;;
     esac
+    log_after_stdout "$s $_log_tag $caller1$@"
 }
 
 # trace(... any)
