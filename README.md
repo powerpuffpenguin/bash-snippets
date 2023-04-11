@@ -17,7 +17,7 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使用 bash
 source log.sh
 ```
 
-log 提供了幾個記錄日誌的函數
+log 提供了幾個記錄日誌的函數 [example](https://github.com/powerpuffpenguin/bash-snippets/blob/main/src/example_log.sh)
 
 ```
 log_trace this is trace
@@ -39,6 +39,20 @@ log_fatal 會在日誌記錄後調用 exit 1 退出
 log 還提供了如下全局變量用於控制如何記錄日誌
 
 ```
+# if != '', print log to this file
+log_to_file=''
+# you can override how to write log to file
+function log_write_file
+{
+    echo "$1" >> "$log_to_file"
+}
+# call after log to stdout, you can override it
+# * $1 log string
+function log_after_stdout
+{
+    return 0
+}
+
 # if != '', print log tag
 log_flag_tag='[DEFAULT]'
 

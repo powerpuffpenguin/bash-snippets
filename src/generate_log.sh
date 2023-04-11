@@ -86,6 +86,7 @@ function ${Prefix}write_file
     echo \"\$1\" >> \"\$${Prefix}to_file\"
 }
 # call after log to stdout, you can override it
+# * \$1 log string
 function ${Prefix}after_stdout
 {
     return 0

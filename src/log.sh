@@ -7,6 +7,7 @@ function log_write_file
     echo "$1" >> "$log_to_file"
 }
 # call after log to stdout, you can override it
+# * $1 log string
 function log_after_stdout
 {
     return 0

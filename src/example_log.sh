@@ -18,6 +18,9 @@ calls=0
 function log_after_stdout
 {
     calls=$((calls+1))
+
+    # After output to stdout can output to file at the same time
+    echo "$1" >> "example_after.log"
 }
 log_trace this is trace message
 log_debug this is debug message
