@@ -14,7 +14,7 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使用 bash
 # log
 
 ```
-source log.sh
+source src/log.sh
 ```
 
 log 提供了幾個記錄日誌的函數 [example](https://github.com/powerpuffpenguin/bash-snippets/blob/main/src/example_log.sh)
