@@ -12,6 +12,7 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使用 bash
 - [result](#result)
 - [const](#const)
 - [log](#log)
+- [assert](#assert)
 
 # result
 
@@ -78,8 +79,33 @@ duration_day=86400
 提供了兩個函數用於將 duration 和 人類友好的字符串之間進行轉換
 
 ```
+# errno
 function duration_string(val) :string
-function duration_
+
+# errno
+function duration_parse(s: string): number
+```
+
+## size
+
+提供了幾個 size 常量用於方便定義檔案大小
+
+```
+size_b=1
+size_k=1024
+size_m=1048576
+size_g=1073741824
+size_t=1099511627776
+```
+
+提供了兩個函數用於將 size 和 人類友好的字符串之間進行轉換
+
+```
+# errno
+function size_string(val) :string
+
+# errno
+function size_parse(s: string): number
 ```
 
 # log
@@ -166,4 +192,24 @@ log_color_warn='95m'
 log_color_error='91m'
 # fatal color
 log_color_fatal='31m'
+```
+
+# assert
+
+```
+source dst/assert.sh
+```
+
+assert 提供了一些斷言，如果斷言失敗會在打印調試信息後調用 exit
+1，通常可以用於單元測試或驗證傳入參數
+
+```
+# assert expect == actual
+function assert_equal(expect, actual, msg...)
+
+# assert actual == '' or 'false' or 'FALSE' or 0
+function assert_false(actual, msg...)
+
+# assert actual != ('' or 'false' or 'FALSE' or 0)
+function assert_true(actual, msg...)
 ```

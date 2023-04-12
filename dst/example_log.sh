@@ -27,29 +27,4 @@ log_debug this is debug message
 log_info this is info message
 log_warn this is warn message
 log_error this is error message
-# log_fatal this is fatal message "calls=$calls"
-
-function a
-{
-    code="a1 $@"
-}
-function b
-{
-    code=b1
-}
-x=(
-    1
-    2
-    "3 4"
-)
-# y=("${x[@]}")
-# echo x.len=${#x[@]} y.len=${#y[@]}
-# echo ${y[0]} ${y[1]} ${y[2]}
-a=1;    value=("${x[@]}");
-echo "a=$a"
-echo "len=${#value[@]}"
-i=0
-for val in "${value[@]}";do
-    echo "value[$i] = $val"
-    i=$((i+1))
-done
+log_fatal this is fatal message "calls=$calls"

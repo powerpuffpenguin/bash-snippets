@@ -34,11 +34,25 @@ function bool_false
     fi
     errno=0
 }
+
+function __duration_string
+{
+    if ((v>=compare));then
+        div=$((v/compare))
+        v=$((v%compare))
+        if [ "$s" == '' ];then
+            s="$div$tag"
+        else
+            s="$s$div$tag"
+        fi
+    fi
+}
 duration_second=1
 duration_minute=60
 duration_hour=3600
 duration_day=86400
 
+# errno
 # (duration: number): string
 function duration_string
 {
@@ -55,31 +69,17 @@ function duration_string
     local s=''
     local div
 
-    if ((v>=86400));then
-        div=$((v/86400))
-        v=$((v%86400))
-        s="${div}d"
-    fi
+    local compare=86400
+    local tag=d
+    __duration_string
 
-    if ((v>=3600));then
-        div=$((v/3600))
-        v=$((v%3600))
-        if [ "$s" == '' ];then
-            s="${div}h"
-        else
-            s="$s${div}h"
-        fi
-    fi
+    compare=3600
+    tag=h
+    __duration_string
 
-    if ((v>=60));then
-        div=$((v/60))
-        v=$((v%60))
-        if [ "$s" == '' ];then
-            s="${div}m"
-        else
-            s="$s${div}m"
-        fi
-    fi
+    compare=60
+    tag=m
+    __duration_string
 
     if ((v>0));then
         if [ "$s" == '' ];then
@@ -96,6 +96,7 @@ function duration_string
     fi
 }
 
+# errno
 # (s: string): number
 function duration_parse
 {
@@ -161,5 +162,137 @@ function duration_parse
     else
         errno=1
         result="not a duration string: $1"
+    fi
+}
+
+size_b=1
+size_k=1024
+size_m=1048576
+size_g=1073741824
+size_t=1099511627776
+
+# errno
+# (size: number): string
+function size_string
+{
+    errno=0
+    result=''
+
+    if echo "$1" | egrep -vsq '^[0-9]+$'; then
+        errno=1
+        result="not a size: $1"
+        return 0
+    fi
+
+    local v="$1"
+    local s=''
+    local div
+
+    local compare=1099511627776
+    local tag=t
+    __duration_string
+
+    compare=1073741824
+    tag=g
+    __duration_string
+
+    compare=1048576
+    tag=m
+    __duration_string
+
+    compare=1024
+    tag=k
+    __duration_string
+
+    if ((v>0));then
+        if [ "$s" == '' ];then
+            s="${v}b"
+        else
+            s="$s${v}b"
+        fi
+    fi
+    
+    if [ "$s" == '' ];then
+        result=0b
+    else
+        result=$s
+    fi
+}
+
+# errno
+# (s: string): number
+function size_parse
+{
+    errno=0
+    result=''
+    local s="$1"
+    local i=0
+    local n=${#s}
+    local sum=0
+    local v=''
+    local c
+    for ((;i<n;i++));do
+        c=${s:i:1}
+        case "$c"  in
+            0|1|2|3|4|5|6|7|8|9)
+                v="$v$c"
+            ;;
+            t)
+                if [ "$v" == '' ];then
+                    errno=1
+                    result="not a size string: $1"
+                    return
+                fi
+                sum=$((sum+v*1099511627776))
+                v=''
+            ;;
+            g)
+                if [ "$v" == '' ];then
+                    errno=1
+                    result="not a size string: $1"
+                    return
+                fi
+                sum=$((sum+v*1073741824))
+                v=''
+            ;;
+            m)
+                if [ "$v" == '' ];then
+                    errno=1
+                    result="not a size string: $1"
+                    return
+                fi
+                sum=$((sum+v*1048576))
+                v=''
+            ;;
+            k)
+                if [ "$v" == '' ];then
+                    errno=1
+                    result="not a size string: $1"
+                    return
+                fi
+                sum=$((sum+v*1024))
+                v=''
+            ;;
+            b)
+                if [ "$v" == '' ];then
+                    errno=1
+                    result="not a size string: $1"
+                    return
+                fi
+                sum=$((sum+v))
+                v=''
+            ;;
+            *)
+                errno=1
+                result="not a size string: $1"
+                return
+            ;;
+        esac
+    done
+    if [ "$v" == '' ];then
+        result=$sum
+    else
+        errno=1
+        result="not a size string: $1"
     fi
 }
