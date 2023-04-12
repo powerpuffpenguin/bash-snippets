@@ -182,4 +182,3 @@ function log_fatal
     _log_print "$@"
     exit 1
 }
-

@@ -260,5 +260,4 @@ function ${Prefix}fatal
     _${Prefix}tag=\"[fatal]\"
     _${Prefix}print \"\$@\"
     exit 1
-}
-"
+}"
