@@ -1,4 +1,4 @@
-#/bin/sh
+#/bin/bash
 # if != '', print log to this file
 log_to_file=''
 # you can override how to write log to file

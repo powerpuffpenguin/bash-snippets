@@ -77,7 +77,7 @@ while true; do
     esac 
 done
 
-create_file "#/bin/sh
+create_file "#/bin/bash
 # if != '', print log to this file
 ${Prefix}to_file=''
 # you can override how to write log to file
