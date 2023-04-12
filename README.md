@@ -14,10 +14,11 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使用 bash
 # log
 
 ```
-source src/log.sh
+source dst/log.sh
 ```
 
-log 提供了幾個記錄日誌的函數 [example](https://github.com/powerpuffpenguin/bash-snippets/blob/main/src/example_log.sh)
+log 提供了幾個記錄日誌的函數
+[example](https://github.com/powerpuffpenguin/bash-snippets/blob/main/dst/example_log.sh)
 
 ```
 log_trace this is trace
@@ -30,7 +31,7 @@ log_fatal this is fatal
 
 log_fatal 會在日誌記錄後調用 exit 1 退出
 
-**generate_log.sh** 腳本可以用於生成自定義的 log.sh 代碼
+**src/generate_log.sh** 腳本可以用於生成自定義的 log.sh 代碼
 
 ```
 ./src/generate_log.sh -h

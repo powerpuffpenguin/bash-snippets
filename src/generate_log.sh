@@ -83,10 +83,9 @@ ${Prefix}to_file=''
 # you can override how to write log to file
 function ${Prefix}write_file
 {
-    echo \"\$1\" >> \"\$${Prefix}to_file\"
+    echo \"\$@\" >> \"\$${Prefix}to_file\"
 }
 # call after log to stdout, you can override it
-# * \$1 log string
 function ${Prefix}after_stdout
 {
     return 0
@@ -263,6 +262,3 @@ function ${Prefix}fatal
     exit 1
 }
 "
-if [[ $Test == 0 ]];then
-    chmod a+x "$Output"
-fi
