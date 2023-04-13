@@ -72,6 +72,8 @@ function log_write_file
         if [ "$name" == '' ];then
             __log_name="$dir"
             __log_ext=''
+        else
+            echo -
         fi
 
         if [ -d "$dir" ];then

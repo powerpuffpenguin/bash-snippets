@@ -52,3 +52,32 @@ function strings_split
     result=($1)
     IFS=$ifs
 }
+# (s...): string
+function strings_join
+{
+    errno=0
+    result=''
+    local s
+    for s in "${@}";do
+        result="$result$s"
+    done
+}
+# (separator,s...): string
+function strings_join_with
+{
+    errno=0
+    result=''
+    local sep="$1"
+    shift
+
+    local n=${#@}
+    local i=0
+    for ((;i<n;i++));do
+        if [ $i == 0 ];then
+            result="$1"
+        else
+            result="$result$sep$1"
+        fi
+        shift
+    done
+}

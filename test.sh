@@ -121,7 +121,7 @@ function test_file
         if [ "$TestMethod" == '' ];then
             count=$((count+1))
             test_method "$1" "$s"
-        elif [[ "$TestMethod" == "$s" ]];then
+        elif echo "$s" | egrep -sq "$TestMethod";then
             count=$((count+1))
             test_method "$1" "$s"
         fi
