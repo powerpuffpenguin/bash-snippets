@@ -52,6 +52,79 @@ function strings_split
     result=($1)
     IFS=$ifs
 }
+
+# if not found return -1
+# (s, chars): number
+function strings_index_ofchar
+{
+    errno=0
+    result=-1
+    if [ "$1" == '' ] || [ "$2" == '' ];then
+        return
+    fi
+    local s="$1"
+    local ns=${#s}
+    local chars="$2"
+    local nchars=${#chars}
+    local i
+    local j
+    local c0
+    local c1
+    for ((i=0;i<ns;i++));do
+        c0=${s:i:1}
+        if [ "$nchars" == 1 ];then
+            if [ "$c0" == "$chars" ];then
+                result=$i
+                return
+            fi
+        else
+            for ((j=0;j<nchars;j++));do
+                c1=${chars:j:1}
+                if [ "$c0" == "$c1" ];then
+                    result=$i
+                    return
+                fi
+            done
+        fi
+    done
+}
+
+# if not found return -1
+# (s, chars): number
+function strings_last_ofchar
+{
+    errno=0
+    result=-1
+    if [ "$1" == '' ] || [ "$2" == '' ];then
+        return
+    fi
+    local s="$1"
+    local ns=${#s}
+    local chars="$2"
+    local nchars=${#chars}
+    local i
+    local j
+    local c0
+    local c1
+    for ((i=ns-1;i>=0;i--));do
+        c0=${s:i:1}
+        if [ "$nchars" == 1 ];then
+            if [ "$c0" == "$chars" ];then
+                result=$i
+                return
+            fi
+        else
+            for ((j=0;j<nchars;j++));do
+                c1=${chars:j:1}
+                if [ "$c0" == "$c1" ];then
+                    result=$i
+                    return
+                fi
+            done
+        fi
+    done
+}
+
 # (s...): string
 function strings_join
 {
