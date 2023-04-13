@@ -54,7 +54,7 @@ function test_bool
         assert_equal 1 "$v"
     done
 }
-test_bool
+
 
 function test_duration
 {
@@ -91,7 +91,7 @@ function test_duration
     duration_parse "1"; ec=$errno;
     assert_equal 1 $ec
 }
-test_duration
+
 
 function test_size
 {
@@ -128,4 +128,3 @@ function test_size
     size_parse "1"; ec=$errno;
     assert_equal 1 $ec
 }
-test_size
