@@ -27,6 +27,10 @@ function test_start_with
         assert_equal 0 $ec
         assert_equal 1 "$ok" "strings_start_with(${items[i]}, ${items[i+1]})"
     done
+
+    strings_end_with "ab" "abab"; ec=$errno; ok=$result;
+    assert_equal 0 $ec
+    assert_equal 0 "$ok" "strings_end_with(ab,abab)"
 }
 function test_end_with
 {
@@ -50,6 +54,10 @@ function test_end_with
         assert_equal 0 $ec
         assert_equal 1 "$ok" "strings_end_with(${items[i]}, ${items[i+1]})"
     done
+
+    strings_end_with "ab" "abab"; ec=$errno; ok=$result;
+    assert_equal 0 $ec
+    assert_equal 0 "$ok" "strings_end_with(ab,abab)"
 }
 function test_index_ofchar
 {

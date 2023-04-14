@@ -83,38 +83,6 @@ __${Prefix}index=0
 __${Prefix}ext=''
 __${Prefix}count=''
 
-# 0 end_with
-# 1 start_with
-# (s, sub, 1|0 ): 1|0
-function __${Prefix}strings_with
-{
-    errno=0
-    local sub=\"\$2\"
-    if [ \"\$sub\" = '' ];then
-        result=1
-        return
-    fi
-    local n0=\${#sub}
-    local s=\"\$1\"
-    local n1=\${#s}
-    if ((n1<n0));then
-        result=0
-        return
-    elif ((n1>n0));then
-        if [ \$3 == 0 ];then # end with
-            local i=\$((n1-n0))
-            s=\${s:i}
-        else
-            s=\${s:0:n0}
-        fi
-    fi
-    if [ \"\$s\" == \"\$sub\" ];then
-        result=1
-    else
-        result=0
-    fi
-}
-
 # How many log files to store at most
 ${Prefix}file_backups=3
 # The maximum size of a single log store
@@ -124,76 +92,121 @@ ${Prefix}file_name=''
 # write log to file
 function ${Prefix}write_file
 {
-    # get output filename
     local filename
-    if [ \"\$${Prefix}file_name\" == '' ];then
-        filename=\$${Prefix}file_name
-    else
-        filename=\$${Prefix}to_file
-    fi
-
-    # init and check exists log files
+    # not init,do it
     if [ \"\$__${Prefix}count\" == '' ];then
-        # log dir
-        local dir=\`dirname \"\$filename\"\`
-        if [ \"\$dir\" == '' ];then
-            dir='.'
+        # set log filename
+        if [ \"\$${Prefix}file_name\" == '' ];then
+            filename=\$${Prefix}to_file
+        else
+            filename=\$${Prefix}file_name
         fi
-        local errno
-        local result
-        __${Prefix}strings_with \"\$dir\" \"/\" 0
-        if [ \$result == 0 ];then
-            dir=\"\$dir/\"
+
+        # dir and name
+        local n=\${#filename}
+        if [[ \"\$n\" == 0 ]];then
+            local dir='./'
+            local name=''
+        elif [[ \"\${filename:n-1}\" == '/' ]];then
+            local dir=\"\$filename\"
+            local name=''
+        else
+            local dir=\`dirname \"\$filename\"\`
+            n=\${#dir}
+            if [[ \"\${dir:n-1}\" != '/' ]];then
+                dir=\"\$dir/\"
+            fi
+            local name=\`basename \"\$filename\"\`
+            if [[ \"\$name\" == '.' ]];then
+                name=''
+            fi
         fi
-        # log name
+
+        # name and ext
         __${Prefix}index=0
-        local name=\`basename \"\$filename\"\`
+        local ext=''
         if [ \"\$name\" == '' ];then
             __${Prefix}name=\"\$dir\"
             __${Prefix}ext=''
         else
-        
+            __${Prefix}name=\"\$dir\$name\"
+            __${Prefix}ext=''
+            local i=\${#name}
+            local c
+            for ((i=i-1;i>=0;i--));do
+                c=\${name:i:1}
+                if [[ \"\$c\" == \".\" ]];then
+                    __${Prefix}name=\"\$dir\${name:0:i}\"
+                    __${Prefix}ext=\"\${name:i}\"
+                    ext=\"\${name:i}\"
+                    name=\"\${name:0:i}\"
+                    break
+                fi
+            done
         fi
-
+        # find exists log files
         if [ -d \"\$dir\" ];then
             local s=\$IFS
             IFS=\"
 \"
             local strs=(\`find \"\$dir\" -maxdepth 1 -type f\`)
             IFS=\$s
+            local name_len=\${#name}
+            local ext_len=\${#ext}  
+            locai i
             for s in \"\${strs[@]}\";do
                 s=\`basename \"\$s\"\`
+                if [[ \"\${s:0:name_len}\" == \"\$name\" ]];then
+                    s=\${s:name_len}
+                else
+                    continue
+                fi
+                i=\$((\${#s}-ext_len))
+                if ((i>=0)) &&  [[ \"\${s:i}\" == \"\$ext\" ]];then
+                    s=\${s:0:i}
+                else
+                    continue
+                fi
+                if echo \"\$s\" | egrep -vsq '^[0-9]+$'; then
+                    continue
+                fi
+                if ((s>__${Prefix}index));then
+                    __${Prefix}index=\$s
+                fi
             done
         else
             mkdir \"\$dir\" -p
             echo \"${Prefix}write_file: mkdir '\$dir' -p error\"
             return 0
         fi
-        __${Prefix}count=0
+        __${Prefix}count=10000
+    fi
+
+    # current log filename
+    filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
+    
+    # Every 100 writes, check the log file size
+    if ((__${Prefix}count>=100));then
+        local s
+        for s in \`du -b \"\$filename\"\`; do
+            if ((s>=${Prefix}file_size));then
+                __${Prefix}index=\$((__${Prefix}index+1))
+                filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
+                __${Prefix}count=0
+                # delete log
+                local i=\$((__${Prefix}index-${Prefix}file_backups))
+                if ((i>=0)); then
+                    filename=\"\$__${Prefix}name\$i\$__${Prefix}ext\"
+                    if [ -f \"\$filename\" ];then
+                        rm \"\$filename\" -f
+                    fi
+                fi
+            fi
+            break
+        done
     fi
 
     # write log to file
-    filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
     echo \"\$@\" >> \"\$filename\"
-
-    # Every 100 writes, check the log file size
-    if ((__${Prefix}count<100));then
-        __${Prefix}count=\$((__${Prefix}count+1))
-        return
-    fi
-    __${Prefix}count=0
-    for s in \`du -b \"\$filename\"\`; do
-        if ((s>=${Prefix}file_size));then
-            __${Prefix}index=\$((__${Prefix}index+1))
-            # delete log
-            local i=\$((__${Prefix}index-${Prefix}file_backups))
-            if ((i>=0)); then
-                filename=\"\$__${Prefix}name\$i\$__${Prefix}ext\"
-                if [ -f \"\$filename\" ];then
-                    rm \"\$filename\" -f
-                fi
-            fi
-        fi
-        break
-    done
+    __${Prefix}count=\$((__${Prefix}count+1))
 }"
