@@ -14,6 +14,7 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使用 bash
 - [const](#const)
 - [strings](#strings)
 - [log](#log)
+  - [log_writer](#log_writer)
 - [assert](#assert)
 
 # test.sh
@@ -272,6 +273,59 @@ log_color_warn='95m'
 log_color_error='91m'
 # fatal color
 log_color_fatal='31m'
+```
+
+# log_writer
+
+```
+source log_writer.sh
+```
+
+log.sh 支持重載 log_write_file 函數以確定如何寫入日誌檔案，log_writer.sh
+提供了一個默認的重載，它可以控制日誌檔案的最大尺寸和檔案數量，log_writer.sh
+每當日誌超過指定尺寸就會將日誌寫入到新的檔案(檔案名以數字自增)。並且檔案檔案數量超過指定數量時，log_writer.sh
+還會自動刪除舊的日誌檔案
+
+```
+#!/bin/bash
+set -e
+cd `dirname $BASH_SOURCE`
+
+source log.sh
+source log_writer.sh
+
+# 每寫入100 次日誌檢查檔案大小
+log_file_check_times=100
+# 當個日誌檔案的最大參考尺寸是 1mb
+log_file_size=$((1*1024*1024))
+# 最多存在3個日誌檔案
+log_file_backups=3
+# 日誌檔案參考名稱
+log_to_file="./log/writer.log"
+
+# 寫入日誌
+for ((i=0;i<102;i++));do
+    log_info "writer $i"
+done
+```
+
+最簡單的情況是你只需要設定 log\_to\_file 變量來告訴 log.sh
+要將日誌檔案，其它屬性都設置了一個默認的值，你可以只在需要時去修改這些默認設定！
+
+你可以重寫 log\_after\_stdout 函數來實現同時將日誌寫入到 stdout
+和檔案，但要注意將 log\_to\_file 設置爲空白字符串 log.sh 才會將日誌輸出到
+stdout，此時你可以爲 log\_writer.sh 指定 log\_file\_name 變量來設定日誌檔案名稱
+
+```
+source log.sh
+source log_writer.sh
+
+log_to_file=""
+log_file_name="./log/writer.log"
+function log_after_stdout
+{
+    log_write_file "$@"
+}
 ```
 
 # assert
