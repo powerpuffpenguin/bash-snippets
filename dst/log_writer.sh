@@ -7,9 +7,11 @@ __log_count=''
 # How many log files to store at most
 log_file_backups=3
 # The maximum size of a single log store
-log_file_size=$((10*1024*1024))
+log_file_size=$((1*1024*1024))
 # If set will override the filename to write
 log_file_name=''
+# How many times to check log size whenever write
+log_file_check_times=100
 # write log to file
 function log_write_file
 {
@@ -74,7 +76,7 @@ function log_write_file
             IFS=$s
             local name_len=${#name}
             local ext_len=${#ext}  
-            locai i
+            local i
             for s in "${strs[@]}";do
                 s=`basename "$s"`
                 if [[ "${s:0:name_len}" == "$name" ]];then
@@ -97,34 +99,38 @@ function log_write_file
             done
         else
             mkdir "$dir" -p
-            echo "log_write_file: mkdir '$dir' -p error"
-            return 0
+            if [[ $? != 0 ]];then
+                echo "log_write_file: mkdir '$dir' -p error"
+                return 0
+            fi
         fi
-        __log_count=10000
+        __log_count=$log_file_check_times
     fi
 
     # current log filename
     filename="$__log_name$__log_index$__log_ext"
     
     # Every 100 writes, check the log file size
-    if ((__log_count>=100));then
-        local s
-        for s in `du -b "$filename"`; do
-            if ((s>=log_file_size));then
-                __log_index=$((__log_index+1))
-                filename="$__log_name$__log_index$__log_ext"
-                __log_count=0
-                # delete log
-                local i=$((__log_index-log_file_backups))
-                if ((i>=0)); then
-                    filename="$__log_name$i$__log_ext"
-                    if [ -f "$filename" ];then
-                        rm "$filename" -f
+    if ((__log_count>=log_file_check_times));then
+        __log_count=0
+        if [[ -f "$filename" ]];then
+            local s
+            for s in `du -b "$filename"`; do
+                if ((s>=log_file_size));then
+                    __log_index=$((__log_index+1))
+                    filename="$__log_name$__log_index$__log_ext"
+                    # delete log
+                    local i=$((__log_index-log_file_backups))
+                    if ((i>=0)); then
+                        s="$__log_name$i$__log_ext"
+                        if [ -f "$s" ];then
+                            rm "$s" -f
+                        fi
                     fi
                 fi
-            fi
-            break
-        done
+                break
+            done
+        fi
     fi
 
     # write log to file

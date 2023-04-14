@@ -86,9 +86,11 @@ __${Prefix}count=''
 # How many log files to store at most
 ${Prefix}file_backups=3
 # The maximum size of a single log store
-${Prefix}file_size=\$((10*1024*1024))
+${Prefix}file_size=\$((1*1024*1024))
 # If set will override the filename to write
 ${Prefix}file_name=''
+# How many times to check log size whenever write
+${Prefix}file_check_times=100
 # write log to file
 function ${Prefix}write_file
 {
@@ -153,7 +155,7 @@ function ${Prefix}write_file
             IFS=\$s
             local name_len=\${#name}
             local ext_len=\${#ext}  
-            locai i
+            local i
             for s in \"\${strs[@]}\";do
                 s=\`basename \"\$s\"\`
                 if [[ \"\${s:0:name_len}\" == \"\$name\" ]];then
@@ -176,34 +178,38 @@ function ${Prefix}write_file
             done
         else
             mkdir \"\$dir\" -p
-            echo \"${Prefix}write_file: mkdir '\$dir' -p error\"
-            return 0
+            if [[ \$? != 0 ]];then
+                echo \"${Prefix}write_file: mkdir '\$dir' -p error\"
+                return 0
+            fi
         fi
-        __${Prefix}count=10000
+        __${Prefix}count=\$${Prefix}file_check_times
     fi
 
     # current log filename
     filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
     
     # Every 100 writes, check the log file size
-    if ((__${Prefix}count>=100));then
-        local s
-        for s in \`du -b \"\$filename\"\`; do
-            if ((s>=${Prefix}file_size));then
-                __${Prefix}index=\$((__${Prefix}index+1))
-                filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
-                __${Prefix}count=0
-                # delete log
-                local i=\$((__${Prefix}index-${Prefix}file_backups))
-                if ((i>=0)); then
-                    filename=\"\$__${Prefix}name\$i\$__${Prefix}ext\"
-                    if [ -f \"\$filename\" ];then
-                        rm \"\$filename\" -f
+    if ((__${Prefix}count>=${Prefix}file_check_times));then
+        __${Prefix}count=0
+        if [[ -f \"\$filename\" ]];then
+            local s
+            for s in \`du -b \"\$filename\"\`; do
+                if ((s>=${Prefix}file_size));then
+                    __${Prefix}index=\$((__${Prefix}index+1))
+                    filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
+                    # delete log
+                    local i=\$((__${Prefix}index-${Prefix}file_backups))
+                    if ((i>=0)); then
+                        s=\"\$__${Prefix}name\$i\$__${Prefix}ext\"
+                        if [ -f \"\$s\" ];then
+                            rm \"\$s\" -f
+                        fi
                     fi
                 fi
-            fi
-            break
-        done
+                break
+            done
+        fi
     fi
 
     # write log to file
