@@ -309,12 +309,12 @@ for ((i=0;i<102;i++));do
 done
 ```
 
-最簡單的情況是你只需要設定 log\_to\_file 變量來告訴 log.sh
+最簡單的情況是你只需要設定 log_to_file 變量來告訴 log.sh
 要將日誌檔案，其它屬性都設置了一個默認的值，你可以只在需要時去修改這些默認設定！
 
-你可以重寫 log\_after\_stdout 函數來實現同時將日誌寫入到 stdout
-和檔案，但要注意將 log\_to\_file 設置爲空白字符串 log.sh 才會將日誌輸出到
-stdout，此時你可以爲 log\_writer.sh 指定 log\_file\_name 變量來設定日誌檔案名稱
+你可以重寫 log_after_stdout 函數來實現同時將日誌寫入到 stdout 和檔案，但要注意將
+log_to_file 設置爲空白字符串 log.sh 才會將日誌輸出到 stdout，此時你可以爲
+log_writer.sh 指定 log_file_name 變量來設定日誌檔案名稱
 
 ```
 source log.sh
@@ -327,6 +327,8 @@ function log_after_stdout
     log_write_file "$@"
 }
 ```
+
+**src/generate_log_writer.sh** 腳本可以用於生成自定義的 log_writer.sh 代碼
 
 # assert
 
