@@ -209,7 +209,7 @@ log_fatal this is fatal
 
 log_fatal 會在日誌記錄後調用 exit 1 退出
 
-**src/generate_log.sh** 腳本可以用於生成自定義的 log.sh 代碼
+**dst/generate_log.sh** 腳本可以用於生成自定義的 log.sh 代碼
 
 ```
 ./src/generate_log.sh -h
@@ -328,7 +328,7 @@ function log_after_stdout
 }
 ```
 
-**src/generate_log_writer.sh** 腳本可以用於生成自定義的 log_writer.sh 代碼
+**dst/generate_log_writer.sh** 腳本可以用於生成自定義的 log_writer.sh 代碼
 
 # assert
 
