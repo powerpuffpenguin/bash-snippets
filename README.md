@@ -3,21 +3,21 @@
 本喵寫的一些 bash 代碼片段
 
 本喵以前打算[模塊化 bash](https://github.com/powerpuffpenguin/bash_module) (在
-bash 中模擬 namespace/package)，但後來發現這樣反而使用 bash
-使用變得複雜並且不如直接使用更高階的腳本語言方便。
+bash 中模擬 namespace/package)，但後來發現這樣反而使 bash
+的使用變得複雜並且不如直接使用更高階的腳本語言方便。
 
 本喵現在的做法是將 bash 代碼片段測試完畢後存儲在這個 git
 中，需要哪個功能就直接將其複製過去使用即可。
 
-- [test.sh](#test.sh)
+- [test.sh](#test)
+  - [assert](#assert)
 - [result](#result)
 - [const](#const)
 - [strings](#strings)
 - [log](#log)
   - [log_writer](#log_writer)
-- [assert](#assert)
 
-# test.sh
+# test
 
 **test.sh** 是一個 bash 測試腳本，可以傳入要測試的腳本，它將搜索腳本裏所有以
 test\_ 爲前綴的函數並調用它們
@@ -48,7 +48,7 @@ $ ./test.sh -d dst -s
 test 3 files, 11 passed, used 0s
 ```
 
-test.sh 還支持其它的一些參數，你可以使用 -h 指令查看具體的所有方法
+test.sh 還支持其它的一些參數，你可以使用 -h 指令查看具體的使用方法
 
 ```
 $ ./test.sh -h
@@ -63,6 +63,26 @@ Flags:
   -m, --method         function name to test
   -t, --test           print the test function to be executed, but don't actually execute the test
   -h, --help           help for test.sh
+```
+
+## assert
+
+```
+source dst/assert.sh
+```
+
+assert 提供了一些斷言，如果斷言失敗會在打印調試信息後調用 exit
+1，通常可以用於單元測試
+
+```
+# assert expect == actual
+function assert_equal(expect, actual, msg...)
+
+# assert actual == '' or 'false' or 'FALSE' or 0
+function assert_false(actual, msg...)
+
+# assert actual != ('' or 'false' or 'FALSE' or 0)
+function assert_true(actual, msg...)
 ```
 
 # result
@@ -275,7 +295,7 @@ log_color_error='91m'
 log_color_fatal='31m'
 ```
 
-# log_writer
+## log_writer
 
 ```
 source log_writer.sh
@@ -283,7 +303,7 @@ source log_writer.sh
 
 log.sh 支持重載 log_write_file 函數以確定如何寫入日誌檔案，log_writer.sh
 提供了一個默認的重載，它可以控制日誌檔案的最大尺寸和檔案數量，log_writer.sh
-每當日誌超過指定尺寸就會將日誌寫入到新的檔案(檔案名以數字自增)。並且檔案檔案數量超過指定數量時，log_writer.sh
+每當日誌超過指定尺寸就會將日誌寫入到新的檔案(檔案名以數字自增)。並且檔案數量超過指定數量時，log_writer.sh
 還會自動刪除舊的日誌檔案
 
 ```
@@ -310,7 +330,7 @@ done
 ```
 
 最簡單的情況是你只需要設定 log_to_file 變量來告訴 log.sh
-要將日誌檔案，其它屬性都設置了一個默認的值，你可以只在需要時去修改這些默認設定！
+要將日誌寫入檔案，其它屬性都設置了一個默認的值，你可以只在需要時去修改這些默認設定！
 
 你可以重寫 log_after_stdout 函數來實現同時將日誌寫入到 stdout 和檔案，但要注意將
 log_to_file 設置爲空白字符串 log.sh 才會將日誌輸出到 stdout，此時你可以爲
@@ -329,23 +349,3 @@ function log_after_stdout
 ```
 
 **dst/generate_log_writer.sh** 腳本可以用於生成自定義的 log_writer.sh 代碼
-
-# assert
-
-```
-source dst/assert.sh
-```
-
-assert 提供了一些斷言，如果斷言失敗會在打印調試信息後調用 exit
-1，通常可以用於單元測試或驗證傳入參數
-
-```
-# assert expect == actual
-function assert_equal(expect, actual, msg...)
-
-# assert actual == '' or 'false' or 'FALSE' or 0
-function assert_false(actual, msg...)
-
-# assert actual != ('' or 'false' or 'FALSE' or 0)
-function assert_true(actual, msg...)
-```
