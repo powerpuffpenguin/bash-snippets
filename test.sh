@@ -24,8 +24,8 @@ function help
     echo "Flags:"
     print_flag "-s, --silent" "silent mode (default false)"
     print_flag "-d, --dir" "test file dir (default \"$TestDir\")"
-    print_flag "-m, --method" "function name to test"
-    print_flag "-t, --test" "only output generated code to the stdout but don't actually write to the output file"
+    print_flag "-m, --method" "function name to test (match by egrep)"
+    print_flag "-t, --test" "print the test function to be executed, but don't actually execute the test"
     print_flag "-h, --help" "help for $Command"
 }
 
@@ -77,11 +77,13 @@ function test_method
     if [ $TestSilent == 0 ];then
         local start=`date +%s`
     fi
-    bash -c "#/bin/bash
+    if [ $Test == 0 ];then
+        bash -c "#/bin/bash
 set -e
 source \"$1\"
 $2
 "
+    fi
     if [ $TestSilent == 0 ];then
         local end=`date +%s`
         echo " - $2 $((end-start))s"

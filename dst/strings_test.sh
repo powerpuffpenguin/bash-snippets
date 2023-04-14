@@ -28,8 +28,6 @@ function test_start_with
         assert_equal 1 "$ok" "strings_start_with(${items[i]}, ${items[i+1]})"
     done
 }
-
-
 function test_end_with
 {
     local items=(
@@ -53,7 +51,54 @@ function test_end_with
         assert_equal 1 "$ok" "strings_end_with(${items[i]}, ${items[i+1]})"
     done
 }
+function test_index_ofchar
+{
+    local items=(
+        "12345" "a" -1
+        "12345" "3" 2
+        "12345" "a3" 2
+        "12345" "3b" 2
+        "12345" "5" 4
+        "1234\"" "5\"" 4
+        "1234'x1" "'x" 4
+        "1234'x1" "x'" 4
+    )
+    local ec
+    local ok
+    local count=${#items[@]}
+    local i
+    v=0
+    for ((i=0;i<count;i=i+3));do
+        strings_index_ofchar "${items[i]}" "${items[i+1]}"
+        assert_equal 0 $errno
+        assert_equal "${items[i+2]}" $result "strings_index_ofchar(${items[i]}, ${items[i+1]})"
+    done
 
+}
+function test_last_ofchar
+{
+    local items=(
+        "12345" "a" -1
+        "12345" "3" 2
+        "12345" "a3" 2
+        "12345" "3b" 2
+        "12345" "5" 4
+        "1234\"" "5\"" 4
+        "1234'x1" "'x" 5
+        "1234'x1" "x'" 5
+    )
+    local ec
+    local ok
+    local count=${#items[@]}
+    local i
+    v=0
+    for ((i=0;i<count;i=i+3));do
+        strings_last_ofchar "${items[i]}" "${items[i+1]}"
+        assert_equal 0 $errno
+        assert_equal "${items[i+2]}" $result "strings_last_ofchar(${items[i]}, ${items[i+1]})"
+    done
+
+}
 function test_split
 {
     local items=(

@@ -9,10 +9,60 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使用 bash
 本喵現在的做法是將 bash 代碼片段測試完畢後存儲在這個 git
 中，需要哪個功能就直接將其複製過去使用即可。
 
+- [test.sh](#test.sh)
 - [result](#result)
 - [const](#const)
+- [strings](#strings)
 - [log](#log)
 - [assert](#assert)
+
+# test.sh
+
+**test.sh** 是一個 bash 測試腳本，可以傳入要測試的腳本，它將搜索腳本裏所有以
+test\_ 爲前綴的函數並調用它們
+
+```
+$ ./test.sh dst/strings_test.sh dst/const_test.sh 
+dst/strings_test.sh
+ - test_start_with 0s
+ - test_end_with 0s
+ - test_index_ofchar 0s
+ - test_last_ofchar 0s
+ - test_split 0s
+ - test_join_with 0s
+ * 6 passed, used 0s
+dst/const_test.sh
+ - test_bool 0s
+ - test_duration 0s
+ - test_size 0s
+ * 3 passed, used 0s
+test 2 files, 9 passed, used 0s
+```
+
+你也可以不指定腳本而指定一個目錄，test.sh 會查找目錄下所有以 _test.sh
+爲後綴的腳本並執行測試
+
+```
+$ ./test.sh -d dst -s
+test 3 files, 11 passed, used 0s
+```
+
+test.sh 還支持其它的一些參數，你可以使用 -h 指令查看具體的所有方法
+
+```
+$ ./test.sh -h
+test bash scripts
+
+Usage:
+  test.sh [flags]
+
+Flags:
+  -s, --silent         silent mode (default false)
+  -d, --dir            test file dir (default "$(cd `dirname $BASH_SOURCE` && pwd)")
+  -m, --method         function name to test
+  -t, --test           print the test function to be executed, but don't actually execute the test
+  -h, --help           help for test.sh
+```
 
 # result
 
@@ -106,6 +156,36 @@ function size_string(val) :string
 
 # errno
 function size_parse(s: string): number
+```
+
+# strings
+
+```
+source dst/strings.sh
+```
+
+strings 中提供了多個字符串處理相關的函數
+
+```
+# 如果 s 以 sub 結尾返回 1
+function strings_end_with(s, sub): 1|0
+
+# 如果 s 以 sub 前綴返回 1
+function strings_start_with(s, sub): 1|0
+
+# 將 s 以 separators 中的字符分割
+function strings_split(s, separators): []string
+
+# 在 s 中查找首次出現 chars 指定的字符的位置，未找到返回 -1
+function strings_index_ofchar(s, chars): number
+
+# 在 s 中查找最後一次出現 chars 指定的字符的位置，未找到返回 -1
+function strings_last_ofchar(s, chars): number
+
+# 將數組連接在一起
+function strings_join(s...): string
+# 將數組使用 separator 連接在一起
+function strings_join_with(separator,s...): string
 ```
 
 # log
