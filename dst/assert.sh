@@ -29,6 +29,48 @@ function _assert_error
     _assert_print "Test:" "$sub"
     exit 1
 }
+# (msg...)
+function assert_message
+{
+    local line
+    local sub
+    local file
+    read line sub file < <(caller 0)
+
+    local name=`basename "$file"`
+    echo "--- FAIL: $sub"
+    echo "    $name:$line:"
+    _assert_print "Error Trace:" "$file:$line"
+    if [[ "$@" != '' ]];then
+        _assert_print "Message:" "$@"
+    fi
+    _assert_print "Test:" "$sub"
+    exit 1
+}
+# (title, expect, actual, msg...)
+function assert_error
+{
+    local line
+    local sub
+    local file
+    read line sub file < <(caller 0)
+
+    local name=`basename "$file"`
+    echo "--- FAIL: $sub"
+    echo "    $name:$line:"
+    _assert_print "Error Trace:" "$file:$line"
+    _assert_print "Error:" "$1"
+    _assert_print "" "expected: $2"
+    _assert_print "" "actual  : $3"
+
+    shift 3
+    if [[ "$@" != '' ]];then
+        _assert_print "Message:" "$@"
+    fi
+
+    _assert_print "Test:" "$sub"
+    exit 1
+}
 # (expect, actual, msg...)
 function assert_equal
 {

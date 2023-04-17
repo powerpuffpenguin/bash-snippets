@@ -17,20 +17,27 @@ function test_start_with
         "ab'\"" "ab'\""
     )
 
-    local ec
-    local ok
+
     local count=${#items[@]}
     local i
-    v=0
     for ((i=0;i<count;i=i+2));do
-        strings_start_with "${items[i]}" "${items[i+1]}"; ec=$errno; ok=$result;
-        assert_equal 0 $ec
-        assert_equal 1 "$ok" "strings_start_with(${items[i]}, ${items[i+1]})"
+        if ! strings_start_with "${items[i]}" "${items[i+1]}";then
+            assert_error "strings_start_with(${items[i]}, ${items[i+1]})" true false
+        fi
     done
 
-    strings_end_with "ab" "abab"; ec=$errno; ok=$result;
-    assert_equal 0 $ec
-    assert_equal 0 "$ok" "strings_end_with(ab,abab)"
+    items=(
+        ab abab
+        ab 123
+        "" a
+        ab "ab*"
+    )
+    count=${#items[@]}
+    for ((i=0;i<count;i=i+2));do
+        if  strings_start_with "${items[i]}" "${items[i+1]}";then
+            assert_error "strings_start_with(${items[i]}, ${items[i+1]})" false true
+        fi 
+    done
 }
 function test_end_with
 {
@@ -44,20 +51,27 @@ function test_end_with
         "ab'\"" "ab'\""
     )
 
-    local ec
-    local ok
     local count=${#items[@]}
     local i
     v=0
     for ((i=0;i<count;i=i+2));do
-        strings_end_with "${items[i]}" "${items[i+1]}"; ec=$errno; ok=$result;
-        assert_equal 0 $ec
-        assert_equal 1 "$ok" "strings_end_with(${items[i]}, ${items[i+1]})"
+        if ! strings_end_with "${items[i]}" "${items[i+1]}";then
+            assert_error "strings_end_with(${items[i]}, ${items[i+1]})" true false
+        fi 
     done
 
-    strings_end_with "ab" "abab"; ec=$errno; ok=$result;
-    assert_equal 0 $ec
-    assert_equal 0 "$ok" "strings_end_with(ab,abab)"
+    items=(
+        ab abab
+        ab 123
+        "" a
+        ab "ab*"
+    )
+    count=${#items[@]}
+    for ((i=0;i<count;i=i+2));do
+        if  strings_end_with "${items[i]}" "${items[i+1]}";then
+            assert_error "strings_end_with(${items[i]}, ${items[i+1]})" false true
+        fi 
+    done
 }
 function test_index_ofchar
 {
@@ -71,17 +85,14 @@ function test_index_ofchar
         "1234'x1" "'x" 4
         "1234'x1" "x'" 4
     )
-    local ec
-    local ok
     local count=${#items[@]}
     local i
-    v=0
     for ((i=0;i<count;i=i+3));do
-        strings_index_ofchar "${items[i]}" "${items[i+1]}"
-        assert_equal 0 $errno
+        if ! strings_index_ofchar "${items[i]}" "${items[i+1]}";then
+            assert_error "strings_index_ofchar(${items[i]}, ${items[i+1]})" true false
+        fi
         assert_equal "${items[i+2]}" $result "strings_index_ofchar(${items[i]}, ${items[i+1]})"
     done
-
 }
 function test_last_ofchar
 {
@@ -95,14 +106,12 @@ function test_last_ofchar
         "1234'x1" "'x" 5
         "1234'x1" "x'" 5
     )
-    local ec
-    local ok
     local count=${#items[@]}
     local i
-    v=0
     for ((i=0;i<count;i=i+3));do
-        strings_last_ofchar "${items[i]}" "${items[i+1]}"
-        assert_equal 0 $errno
+        if ! strings_last_ofchar "${items[i]}" "${items[i+1]}";then
+            assert_error "strings_last_ofchar(${items[i]}, ${items[i+1]})" true false
+        fi
         assert_equal "${items[i+2]}" $result "strings_last_ofchar(${items[i]}, ${items[i+1]})"
     done
 
@@ -118,32 +127,28 @@ function test_split
     local count=${#items[@]}
     local s
     for ((i=0;i<count;i=i+4));do
-        strings_split "${items[i]}" "${items[i+1]}"; ec=$errno; strs=$result;
-        assert_equal 0 $ec "s=${items[i]} sep=${items[i+1]} join=${items[i+2]} n=join=${items[i+3]}"
-        assert_equal "${items[i+3]}" "${#result[@]}" "s=${items[i]} sep=${items[i+1]} join=${items[i+2]} n=join=${items[i+3]}"
+        if ! strings_split "${items[i]}" "${items[i+1]}"; then
+            assert_error "strings_split(${items[i]}, ${items[i+1]})" true false
+        fi
+        assert_equal "${items[i+3]}" "${#result[@]}" "strings_split(${items[i]}, ${items[i+1]})"
 
-        strings_join "${result[@]}"; ec=$errno; s=$result;
-        assert_equal 0 $ec "s=${items[i]} sep=${items[i+1]} join=${items[i+2]} n=join=${items[i+3]}"
-        assert_equal "${items[i+2]}" "$s" "s=${items[i]} sep=${items[i+1]} join=${items[i+2]} n=join=${items[i+3]}"
-    done
-
-    
+        if ! strings_join "${result[@]}"; then
+            assert_error "strings_join(strings_split(${items[i]}, ${items[i+1]}))" true false
+        fi
+        assert_equal "${items[i+2]}" "$result" "strings_join(strings_split(${items[i]}, ${items[i+1]}))"
+    done    
 }
 function test_join_with
 {
     strings_join_with , a
-    assert_equal 0 $errno
     assert_equal "a" "$result"
 
     strings_join_with , 'b 1' c
-    assert_equal 0 $errno
     assert_equal "b 1,c" "$result"
 
     strings_join_with "_x_" 'b 1' c d
-    assert_equal 0 $errno
     assert_equal "b 1_x_c_x_d" "$result"
 
     strings_join_with "" 1 2 3 4
-    assert_equal 0 $errno
     assert_equal "1234" "$result"
 }

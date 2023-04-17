@@ -89,24 +89,27 @@ function assert_true(actual, msg...)
 
 衆所周知 bash
 函數無法返回整數之外的內容，解決方案是可以使用全局變量進行返回，否則使用 echo
-返回字符串，本庫代碼採用了全局變量的方案
+返回字符串，本庫採用全局變量的方式爲函數返回內容
 
-如果函數存在返回值則必然會設置 errno 和 result 兩個全局變量
-
-1. 如果發生了任何錯誤 errno 將是一個非0 整數，而 result 會是錯誤描述信息
-2. 如果一切正常，則 errno 爲 0，並且 result 將是返回的內容
+1. 如果函數是判別式則使用 `return errno` 返回
+2. 如果函數存在返回值則設置變量 `result=...` 作爲返回值
 
 ```
-get_value; ec=$errno; value=$result;
-if [ $ec != 0 ];then
-    echo "$value"
-    exit 1
+# return value
+if ! get_value; then
+  echo "errno: $?"
+  exit 1
 fi
+echo "value=$result"
 
-get_array; value=("${result[@]}");
-echo "len=${#value[@]}"
+
+# return array
+if ! get_array; then
+  echo "errno: $?"
+  exit 1
+fi
 i=0
-for val in "${value[@]}";do
+for val in "${result[@]}";do
     echo "value[$i] = $val"
     i=$((i+1))
 done
@@ -188,11 +191,11 @@ source dst/strings.sh
 strings 中提供了多個字符串處理相關的函數
 
 ```
-# 如果 s 以 sub 結尾返回 1
-function strings_end_with(s, sub): 1|0
+# 判斷 s 以 sub 結尾
+function strings_end_with(s, sub): errno
 
-# 如果 s 以 sub 前綴返回 1
-function strings_start_with(s, sub): 1|0
+# 判斷 s 以 sub 爲前綴
+function strings_start_with(s, sub): errno
 
 # 將 s 以 separators 中的字符分割
 function strings_split(s, separators): []string
