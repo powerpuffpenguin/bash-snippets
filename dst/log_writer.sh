@@ -114,22 +114,19 @@ function log_write_file
     if ((__log_count>=log_file_check_times));then
         __log_count=0
         if [[ -f "$filename" ]];then
-            local s
-            for s in `du -b "$filename"`; do
-                if ((s>=log_file_size));then
-                    __log_index=$((__log_index+1))
-                    filename="$__log_name$__log_index$__log_ext"
-                    # delete log
-                    local i=$((__log_index-log_file_backups))
-                    if ((i>=0)); then
-                        s="$__log_name$i$__log_ext"
-                        if [ -f "$s" ];then
-                            rm "$s" -f
-                        fi
+            local s=`wc -c < "$filename"`
+            if ((s>=log_file_size));then
+                __log_index=$((__log_index+1))
+                filename="$__log_name$__log_index$__log_ext"
+                # delete log
+                local i=$((__log_index-log_file_backups))
+                if ((i>=0)); then
+                    s="$__log_name$i$__log_ext"
+                    if [[ -f "$s" ]];then
+                        rm "$s" -f
                     fi
                 fi
-                break
-            done
+            fi
         fi
     fi
 

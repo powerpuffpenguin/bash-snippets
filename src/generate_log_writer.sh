@@ -193,22 +193,19 @@ function ${Prefix}write_file
     if ((__${Prefix}count>=${Prefix}file_check_times));then
         __${Prefix}count=0
         if [[ -f \"\$filename\" ]];then
-            local s
-            for s in \`du -b \"\$filename\"\`; do
-                if ((s>=${Prefix}file_size));then
-                    __${Prefix}index=\$((__${Prefix}index+1))
-                    filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
-                    # delete log
-                    local i=\$((__${Prefix}index-${Prefix}file_backups))
-                    if ((i>=0)); then
-                        s=\"\$__${Prefix}name\$i\$__${Prefix}ext\"
-                        if [ -f \"\$s\" ];then
-                            rm \"\$s\" -f
-                        fi
+            local s=\`wc -c < \"\$filename\"\`
+            if ((s>=${Prefix}file_size));then
+                __${Prefix}index=\$((__${Prefix}index+1))
+                filename=\"\$__${Prefix}name\$__${Prefix}index\$__${Prefix}ext\"
+                # delete log
+                local i=\$((__${Prefix}index-${Prefix}file_backups))
+                if ((i>=0)); then
+                    s=\"\$__${Prefix}name\$i\$__${Prefix}ext\"
+                    if [[ -f \"\$s\" ]];then
+                        rm \"\$s\" -f
                     fi
                 fi
-                break
-            done
+            fi
         fi
     fi
 

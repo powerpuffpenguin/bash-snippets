@@ -20,7 +20,7 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使 bash
 # test
 
 **test.sh** 是一個 bash 測試腳本，可以傳入要測試的腳本，它將搜索腳本裏所有以
-test\_ 爲前綴的函數並調用它們
+test_ 爲前綴的函數並調用它們(test 函數需要使用關鍵字 function 進行聲明)
 
 ```
 $ ./test.sh dst/strings_test.sh dst/const_test.sh 
