@@ -1,7 +1,7 @@
 #/bin/bash
 
 # returns the name without the extension
-# (filepath: string): (name: string, ext: string)
+# (filepath: string) (name: string, ext: string)
 function path_split_name
 {
     result=(
@@ -144,4 +144,89 @@ function path_clean
 	if [[ $result == '' ]];then
 		result=.
 	fi
+}
+
+# (filepath: string) (dir: string, name: string)
+function path_split
+{
+    result=(
+        ''
+        "$1"
+    )
+    local i=${#1}
+    local c
+    for ((i=i-1;i>=0;i--));do
+        c=${1:i:1}
+        if [[ $c == / ]];then
+            result=(
+                "${1:0:i+1}"
+                "${1:i+1}"
+            )
+            break
+        fi
+    done
+}
+# (filepath: string): string
+function path_dir
+{
+    path_split "$1"
+    path_clean "${result[0]}"
+}
+
+# (filepath: string): string
+# Returns the last element of path.
+# Trailing slashes are removed before extracting the last element.
+# If the path is empty, path_base returns ".".
+# If the path consists entirely of slashes, path_base returns "/".
+function path_base
+{
+    if [[ $1 == '' ]];then
+        result=.
+        return
+    fi
+    result=$1
+    local n
+    while true; do
+        n=${#result}
+        if ((n>0)) && [[ "${result:n-1}" == / ]];then
+            result=${result:0:n-1}
+            continue
+        fi
+        break
+    done
+    # Find the last element
+    path_split "$result"
+    result=${result[1]}
+    if [[ $result == '' ]];then
+        result=/
+    fi
+}
+# (filepath: string): errno
+function path_is_abs
+{
+    if [[ "${1:0:1 }" != / ]];then
+        return 1
+    fi
+}
+# (elem ...): string
+function path_join
+{
+    result=''
+    local s
+    local size=0
+    for s in "$@";do
+        size=$((size+${#s}))
+    done
+    if [[ $size == 0 ]];then
+        return
+    fi
+
+    for s in "$@";do
+        if [[ $result == '' ]];then
+            result=$s
+        else
+            result="$result/$s"
+        fi
+    done
+    path_clean "$result"
 }
