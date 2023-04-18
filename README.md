@@ -9,13 +9,44 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使 bash
 本喵現在的做法是將 bash 代碼片段測試完畢後存儲在這個 git
 中，需要哪個功能就直接將其複製過去使用即可。
 
+- [result](#result)
 - [test.sh](#test)
   - [assert](#assert)
-- [result](#result)
 - [const](#const)
 - [strings](#strings)
 - [log](#log)
   - [log_writer](#log_writer)
+
+# result
+
+衆所周知 bash
+函數無法返回整數之外的內容，解決方案是可以使用全局變量進行返回，否則使用 echo
+返回字符串，本庫採用全局變量的方式爲函數返回內容(echo
+無法返回數組，並且在函數出錯時也難以 return errno 通知調用者函數錯誤)
+
+1. 如果函數是判別式則使用 `return errno` 返回
+2. 如果函數存在返回值則設置變量 `result=...` 作爲返回值
+
+```
+# return value
+if ! get_value; then
+  echo "errno: $?"
+  exit 1
+fi
+echo "value=$result"
+
+
+# return array
+if ! get_array; then
+  echo "errno: $?"
+  exit 1
+fi
+i=0
+for val in "${result[@]}";do
+    echo "value[$i] = $val"
+    i=$((i+1))
+done
+```
 
 # test
 
@@ -72,7 +103,7 @@ source dst/assert.sh
 ```
 
 assert 提供了一些斷言，如果斷言失敗會在打印調試信息後調用 exit
-1，通常可以用於單元測試
+1，通常用於書寫單元測試：
 
 ```
 # assert expect == actual
@@ -85,34 +116,17 @@ function assert_false(actual, msg...)
 function assert_true(actual, msg...)
 ```
 
-# result
-
-衆所周知 bash
-函數無法返回整數之外的內容，解決方案是可以使用全局變量進行返回，否則使用 echo
-返回字符串，本庫採用全局變量的方式爲函數返回內容
-
-1. 如果函數是判別式則使用 `return errno` 返回
-2. 如果函數存在返回值則設置變量 `result=...` 作爲返回值
+另外可以調用下列函數來測試函數返回值：
 
 ```
-# return value
-if ! get_value; then
-  echo "errno: $?"
-  exit 1
-fi
-echo "value=$result"
+# assert f(args...) == expect
+function assert_call_equal(expect, f, args...)
 
+# assert f(args) bash return 0
+function assert_call_true(f, args...)
 
-# return array
-if ! get_array; then
-  echo "errno: $?"
-  exit 1
-fi
-i=0
-for val in "${result[@]}";do
-    echo "value[$i] = $val"
-    i=$((i+1))
-done
+# assert f(args) bash return != 0
+function assert_call_false(f, args...)
 ```
 
 # const
@@ -125,18 +139,18 @@ const 定義了一些 時間 檔案大小 相關的常量，並提供了一些�
 
 ## bool
 
-提供了三個 bool 相關的方法用於明確的 bool 判斷
+提供了三個 bool 相關的方法用於 bool 判斷
 
 ```
 # false: '' or 'false' or 'FALSE' or 0
 # true: != ('' or 'false' or 'FALSE' or 0)
 function bool_string(val): 'true' | 'false'
 
-# != ('' or 'false' or 'FALSE' or 0) ? 1 : 0
-function bool_true(val): 1|0
+# 判斷 val != ('' or 'false' or 'FALSE' or 0)
+function bool_true(val): errno
 
-# == ('' or 'false' or 'FALSE' or 0) ? 1 : 0
-function bool_false(val): 1|0
+# 判斷 val == ('' or 'false' or 'FALSE' or 0) 
+function bool_false(val): errno
 ```
 
 ## duration

@@ -1,12 +1,25 @@
 #!/bin/bash
-
-function _assert_print
+function __assert_join_args 
+{
+    s=''
+    local n=${#@}
+    local i=0
+    for ((;i<n;i++));do
+        if [[ $i == 0 ]];then
+            s="$1"
+        else
+            s="$s, $1"
+        fi
+        shift
+    done
+}
+function __assert_print
 {
     local field="$1"
     shift
     printf "      %20s %s\n" "$field" "$@"
 }
-function _assert_error
+function __assert_error
 {
     local line
     local sub
@@ -16,61 +29,20 @@ function _assert_error
     local name=`basename "$file"`
     echo "--- FAIL: $sub"
     echo "    $name:$line:"
-    _assert_print "Error Trace:" "$file:$line"
-    _assert_print "Error:" "$1"
-    _assert_print "" "expected: $2"
-    _assert_print "" "actual  : $3"
+    __assert_print "Error Trace:" "$file:$line"
+    __assert_print "Error:" "$1"
+    __assert_print "" "expected: $2"
+    __assert_print "" "actual  : $3"
 
     shift 3
     if [[ "$@" != '' ]];then
-        _assert_print "Message:" "$@"
+        __assert_print "Message:" "$@"
     fi
 
-    _assert_print "Test:" "$sub"
+    __assert_print "Test:" "$sub"
     exit 1
 }
-# (msg...)
-function assert_message
-{
-    local line
-    local sub
-    local file
-    read line sub file < <(caller 0)
 
-    local name=`basename "$file"`
-    echo "--- FAIL: $sub"
-    echo "    $name:$line:"
-    _assert_print "Error Trace:" "$file:$line"
-    if [[ "$@" != '' ]];then
-        _assert_print "Message:" "$@"
-    fi
-    _assert_print "Test:" "$sub"
-    exit 1
-}
-# (title, expect, actual, msg...)
-function assert_error
-{
-    local line
-    local sub
-    local file
-    read line sub file < <(caller 0)
-
-    local name=`basename "$file"`
-    echo "--- FAIL: $sub"
-    echo "    $name:$line:"
-    _assert_print "Error Trace:" "$file:$line"
-    _assert_print "Error:" "$1"
-    _assert_print "" "expected: $2"
-    _assert_print "" "actual  : $3"
-
-    shift 3
-    if [[ "$@" != '' ]];then
-        _assert_print "Message:" "$@"
-    fi
-
-    _assert_print "Test:" "$sub"
-    exit 1
-}
 # (expect, actual, msg...)
 function assert_equal
 {
@@ -81,7 +53,7 @@ function assert_equal
     local expect="$1"
     local actual="$2"
     shift 2
-    _assert_error "Not equal:" "$expect" "$actual" "$@"
+    __assert_error "Not equal:" "$expect" "$actual" "$@"
 }
 
 # assert actual == '' or 'false' or 'FALSE' or 0
@@ -94,7 +66,7 @@ function assert_false
 
     local actual="$1"
     shift 1
-    _assert_error "Should be false" "'' or false or FALSE or 0" "$actual" "$@"
+    __assert_error "Should be false" "'' or false or FALSE or 0" "$actual" "$@"
 }
 
 # assert actual != ('' or 'false' or 'FALSE' or 0)
@@ -104,6 +76,54 @@ function assert_true
     if [ "$1" == '' ] || [ "$1" == false ] || [ "$1" == FALSE ] || [ "$1" == 0 ];then
         local actual="$1"
         shift 1
-        _assert_error "Should be true" "!= ('' or false or FALSE or 0)" "$actual" "$@"
+        __assert_error "Should be true" "!= ('' or false or FALSE or 0)" "$actual" "$@"
+    fi
+}
+# assert f(args...) == expect
+# (expect, f, args...)
+function assert_call_equal
+{
+    local expect=$1
+    local f=$2
+    shift 2
+    local s
+    __assert_join_args "$@"
+    local msg="$f($s)"
+
+    if ! "$f" "$@";then
+        __assert_error "Function '$f' should be return true" true false "$msg"
+        return $?
+    fi
+    if [[ $expect != $result ]];then
+        __assert_error "Function '$f' return not equal:" "$expect" "$result" "$msg"
+    fi
+}
+
+# assert f(args) bash return 0
+# (f, args...)
+function assert_call_true
+{
+    local f=$1
+    shift 1
+    local s
+    __assert_join_args "$@"
+    local msg="$f($s)"
+
+    if ! "$f" "$@";then
+        __assert_error "Function '$f' should be return true" true false "$msg"
+    fi
+}
+# assert f(args) bash return != 0
+# (f, args...)
+function assert_call_false
+{
+    local f=$1
+    shift 1
+    local s
+    __assert_join_args "$@"
+    local msg="$f($s)"
+
+    if "$f" "$@";then
+        __assert_error "Function '$f' should be return false" false true "$msg"
     fi
 }
