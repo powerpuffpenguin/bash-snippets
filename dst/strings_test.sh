@@ -17,13 +17,10 @@ function test_start_with
         "ab'\"" "ab'\""
     )
 
-
     local count=${#items[@]}
     local i
     for ((i=0;i<count;i=i+2));do
-        if ! strings_start_with "${items[i]}" "${items[i+1]}";then
-            assert_error "strings_start_with(${items[i]}, ${items[i+1]})" true false
-        fi
+        assert_call_true strings_start_with "${items[i]}" "${items[i+1]}"
     done
 
     items=(
@@ -34,9 +31,7 @@ function test_start_with
     )
     count=${#items[@]}
     for ((i=0;i<count;i=i+2));do
-        if  strings_start_with "${items[i]}" "${items[i+1]}";then
-            assert_error "strings_start_with(${items[i]}, ${items[i+1]})" false true
-        fi 
+        assert_call_false strings_start_with "${items[i]}" "${items[i+1]}"
     done
 }
 function test_end_with
@@ -55,9 +50,7 @@ function test_end_with
     local i
     v=0
     for ((i=0;i<count;i=i+2));do
-        if ! strings_end_with "${items[i]}" "${items[i+1]}";then
-            assert_error "strings_end_with(${items[i]}, ${items[i+1]})" true false
-        fi 
+        assert_call_true strings_end_with "${items[i]}" "${items[i+1]}"
     done
 
     items=(
@@ -68,9 +61,7 @@ function test_end_with
     )
     count=${#items[@]}
     for ((i=0;i<count;i=i+2));do
-        if  strings_end_with "${items[i]}" "${items[i+1]}";then
-            assert_error "strings_end_with(${items[i]}, ${items[i+1]})" false true
-        fi 
+        assert_call_false strings_end_with "${items[i]}" "${items[i+1]}"
     done
 }
 function test_index_ofchar
@@ -88,10 +79,8 @@ function test_index_ofchar
     local count=${#items[@]}
     local i
     for ((i=0;i<count;i=i+3));do
-        if ! strings_index_ofchar "${items[i]}" "${items[i+1]}";then
-            assert_error "strings_index_ofchar(${items[i]}, ${items[i+1]})" true false
-        fi
-        assert_equal "${items[i+2]}" $result "strings_index_ofchar(${items[i]}, ${items[i+1]})"
+        assert_call_equal  "${items[i+2]}" \
+            strings_index_ofchar "${items[i]}" "${items[i+1]}"
     done
 }
 function test_last_ofchar
@@ -109,12 +98,9 @@ function test_last_ofchar
     local count=${#items[@]}
     local i
     for ((i=0;i<count;i=i+3));do
-        if ! strings_last_ofchar "${items[i]}" "${items[i+1]}";then
-            assert_error "strings_last_ofchar(${items[i]}, ${items[i+1]})" true false
-        fi
-        assert_equal "${items[i+2]}" $result "strings_last_ofchar(${items[i]}, ${items[i+1]})"
+        assert_call_equal "${items[i+2]}" \
+            strings_last_ofchar "${items[i]}" "${items[i+1]}"
     done
-
 }
 function test_split
 {
@@ -127,28 +113,22 @@ function test_split
     local count=${#items[@]}
     local s
     for ((i=0;i<count;i=i+4));do
-        if ! strings_split "${items[i]}" "${items[i+1]}"; then
-            assert_error "strings_split(${items[i]}, ${items[i+1]})" true false
-        fi
+        assert_call_true strings_split \
+            "${items[i]}" "${items[i+1]}"
         assert_equal "${items[i+3]}" "${#result[@]}" "strings_split(${items[i]}, ${items[i+1]})"
 
-        if ! strings_join "${result[@]}"; then
-            assert_error "strings_join(strings_split(${items[i]}, ${items[i+1]}))" true false
-        fi
-        assert_equal "${items[i+2]}" "$result" "strings_join(strings_split(${items[i]}, ${items[i+1]}))"
+        assert_call_equal "${items[i+2]}" \
+            strings_join "${result[@]}"
     done    
 }
 function test_join_with
 {
-    strings_join_with , a
-    assert_equal "a" "$result"
-
-    strings_join_with , 'b 1' c
-    assert_equal "b 1,c" "$result"
-
-    strings_join_with "_x_" 'b 1' c d
-    assert_equal "b 1_x_c_x_d" "$result"
-
-    strings_join_with "" 1 2 3 4
-    assert_equal "1234" "$result"
+    assert_call_equal  a \
+        strings_join_with , a
+    assert_call_equal "b 1,c" \
+        strings_join_with , 'b 1' c
+    assert_call_equal "b 1_x_c_x_d" \
+        strings_join_with "_x_" 'b 1' c d
+    assert_call_equal 1234 \
+        strings_join_with "" 1 2 3 4
 }

@@ -1,0 +1,147 @@
+#/bin/bash
+
+# returns the name without the extension
+# (filepath: string): (name: string, ext: string)
+function path_split_name
+{
+    result=(
+        "$1"
+        ''
+    )
+    local i=${#1}
+    local c
+    for ((i=i-1;i>=0;i--));do
+        c=${1:i:1}
+        if [[ $c == / ]];then
+            break
+        elif [[ $c == . ]];then
+            result=(
+                "${1:0:i}"
+                "${1:i}"
+            )
+            break
+        fi
+    done
+}
+
+# returns the name without the extension
+# (filepath: string): string
+function path_name
+{
+    path_split_name "$1"
+    result="${result[0]}"
+}
+# return extension name
+# (filepath: string): string
+function path_ext
+{
+    path_split_name "$1"
+    result="${result[1]}"
+}
+# (filepath: string): string
+# Clean returns the shortest path name equivalent to path
+# by purely lexical processing. It applies the following rules
+# iteratively until no further processing can be done:
+#
+#  1. Replace multiple slashes with a single slash.
+#  2. Eliminate each . path name element (the current directory).
+#  3. Eliminate each inner .. path name element (the parent directory)
+#     along with the non-.. element that precedes it.
+#  4. Eliminate .. elements that begin a rooted path:
+#     that is, replace "/.." by "/" at the beginning of a path.
+#
+# The returned path ends in a slash only if it is the root "/".
+#
+# If the result of this process is an empty string, Clean
+# returns the string ".".
+#
+# See also Rob Pike, “Lexical File Names in Plan 9 or
+# Getting Dot-Dot Right,”
+# https://9p.io/sys/doc/lexnames.html
+function path_clean
+{
+    if [[ $1 == '' ]];then
+        result=.
+		return
+	fi
+    result=''
+
+	local n=${#1}
+    # 
+    local r=0
+    local dotdot=0
+	if [[ "${1:0:1}" == / ]];then
+        local rooted=1
+        result=/
+        r=1
+        dotdot=1
+    else
+        local rooted=0
+    fi
+    local c0
+    local r1
+    local r2
+    local w
+    while ((r<n));do
+        c0=${1:r:1}
+        if [[ $c0 == / ]];then
+            # empty path element
+            r=$((r+1))
+            continue
+        fi
+        if [[ $c0 == . ]];then
+            r1=$((r+1))
+            if [[ $r1 == $n ]] || [[ "${1:r1:1}" == / ]];then
+                # . element
+                r=$((r+1))
+                continue
+            elif [[ "${1:r1:1}" == . ]];then
+                r2=$((r+2))
+                if [[ $r2 == $n ]] || [[ "${1:r2:1}" == / ]];then
+                    #  .. element: remove to last /
+                    r=$r2
+                    w=${#result}
+                    if ((w>dotdot));then
+                        w=$((w-1))
+                        while ((w>dotdot)) && [[ "${result:w:1}" != / ]]; do
+                          w=$((w-1))
+                        done
+                        result=${result:0:w}
+                    elif [[ $rooted == 0 ]];then
+                        if [[ $result == '' ]];then
+                            result=..
+                        else
+                            result="$result/.."
+                        fi
+                        dotdot=${#result}
+                    fi
+                    continue
+                fi
+            fi
+        fi
+                    
+        # real path element.
+        # add slash if needed
+        w=${#result}
+        if [[ $rooted == 1 ]];then
+            if [[ $w != 1 ]];then
+                result="$result/"
+            fi
+        elif [[ $w != 0 ]];then
+            result="$result/"
+        fi
+        while ((r<n)); do
+            c0=${1:r:1}
+            if [[ $c0 == / ]];then
+                break
+            fi
+            result="$result$c0"
+            r=$((r+1))
+        done
+	done
+
+	# Turn empty string into "."
+	if [[ $result == '' ]];then
+		result=.
+	fi
+}
