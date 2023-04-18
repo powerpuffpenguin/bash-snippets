@@ -14,6 +14,7 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使 bash
   - [assert](#assert)
 - [const](#const)
 - [strings](#strings)
+- [path](#path)
 - [log](#log)
   - [log_writer](#log_writer)
 
@@ -224,6 +225,59 @@ function strings_last_ofchar(s, chars): number
 function strings_join(s...): string
 # 將數組使用 separator 連接在一起
 function strings_join_with(separator,s...): string
+```
+
+# path
+
+```
+source dst/path.sh
+```
+
+path 提供來對檔案路徑的處理(純語法分析)
+
+```
+# returns the name without the extension
+function path_split_name(filepath: string) (name: string, ext: string)
+
+# returns the name without the extension
+function path_name(filepath: string): string
+
+# return extension name
+function path_ext(filepath: string): string
+
+# Clean returns the shortest path name equivalent to path
+# by purely lexical processing. It applies the following rules
+# iteratively until no further processing can be done:
+#
+#  1. Replace multiple slashes with a single slash.
+#  2. Eliminate each . path name element (the current directory).
+#  3. Eliminate each inner .. path name element (the parent directory)
+#     along with the non-.. element that precedes it.
+#  4. Eliminate .. elements that begin a rooted path:
+#     that is, replace "/.." by "/" at the beginning of a path.
+#
+# The returned path ends in a slash only if it is the root "/".
+#
+# If the result of this process is an empty string, Clean
+# returns the string ".".
+#
+# See also Rob Pike, “Lexical File Names in Plan 9 or
+# Getting Dot-Dot Right,”
+# https://9p.io/sys/doc/lexnames.html
+function path_clean(filepath: string): string
+
+
+function path_split(filepath: string) (dir: string, name: string)
+function path_dir(filepath: string): string
+
+# Returns the last element of path.
+# Trailing slashes are removed before extracting the last element.
+# If the path is empty, path_base returns ".".
+# If the path consists entirely of slashes, path_base returns "/".
+function path_base(filepath: string): string
+
+function path_is_abs(filepath: string): errno
+function path_join(elem ...): string
 ```
 
 # log
