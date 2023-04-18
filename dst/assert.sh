@@ -46,7 +46,7 @@ function __assert_error
 # (expect, actual, msg...)
 function assert_equal
 {
-    if [ "$1" == "$2" ];then
+    if [[ $1 == $2 ]];then
         return 0
     fi
 
@@ -60,7 +60,7 @@ function assert_equal
 # (actual, msg...)
 function assert_false
 {
-    if [ "$1" == '' ] || [ "$1" == false ] || [ "$1" == FALSE ] || [ "$1" == 0 ];then
+    if [[ $1 == '' ]] || [[ $1 == false ]] || [[ $1 == FALSE ]] || [[ $1 == 0 ]];then
         return 0
     fi
 
@@ -73,7 +73,7 @@ function assert_false
 # (actual, msg...)
 function assert_true
 {
-    if [ "$1" == '' ] || [ "$1" == false ] || [ "$1" == FALSE ] || [ "$1" == 0 ];then
+    if [[ $1 == '' ]] || [[ $1 == false ]] || [[ $1 == FALSE ]] || [[ $1 == 0 ]];then
         local actual="$1"
         shift 1
         __assert_error "Should be true" "!= ('' or false or FALSE or 0)" "$actual" "$@"

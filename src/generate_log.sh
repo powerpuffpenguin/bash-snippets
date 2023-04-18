@@ -136,11 +136,11 @@ ${Prefix}color_fatal='31m'
 function _${Prefix}print
 {
     local s=\"\`date '+%F %H:%M:%S'\`\"
-    if [ \"\$${Prefix}flag_tag\" != '' ];then
+    if [[ \$${Prefix}flag_tag != '' ]];then
         s=\"\$${Prefix}flag_tag \$s\"
     fi
     local caller1=''
-    if [ \"\$${Prefix}flag_line\" != 0 ] || [ \"\$${Prefix}flag_sub\" != 0 ] || [ \"\$${Prefix}flag_file\" != 0 ];then
+    if [[ \$${Prefix}flag_line != 0 ]] || [[ \$${Prefix}flag_sub != 0 ]] || [[ \$${Prefix}flag_file != 0 ]];then
         local line
         local sub
         local file
@@ -151,27 +151,27 @@ function _${Prefix}print
                 caller1=\`basename \"\$file\"\`
             ;;
             2)
-                caller1=\"\$file\"
+                caller1=\$file
             ;;
         esac
 
-        if [ \"\$${Prefix}flag_line\" != 0 ];then
+        if [[ \$${Prefix}flag_line != 0 ]];then
             caller1=\"\$caller1:\$line\"
         fi
-        if [ \"\$${Prefix}flag_sub\" != 0 ]; then
-            if [ \"\$caller1\" == '' ];then
-                caller1=\"\$sub\"
+        if [[ \$${Prefix}flag_sub != 0 ]]; then
+            if [[ \$caller1 == '' ]];then
+                caller1=\$sub
             else
                 caller1=\"\$caller1 \$sub\"
             fi
         fi
 
-        if [ \"\$caller1\" != '' ];then
+        if [[ \$caller1 != '' ]];then
             caller1=\"[\$caller1] \"
         fi
     fi
 
-    if [ \"\$${Prefix}to_file\" != '' ];then
+    if [[ \$${Prefix}to_file != '' ]];then
         ${Prefix}write_file \"\$s \$_${Prefix}tag \$caller1\$@\"
         return \$?
     fi

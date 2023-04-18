@@ -249,7 +249,7 @@ log_fatal 會在日誌記錄後調用 exit 1 退出
 **dst/generate_log.sh** 腳本可以用於生成自定義的 log.sh 代碼
 
 ```
-./src/generate_log.sh -h
+./dst/generate_log.sh -h
 ```
 
 log 還提供了如下全局變量用於控制如何記錄日誌

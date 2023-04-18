@@ -74,31 +74,31 @@ start=`date +%s`
 function test_method
 {
     _TestCount=$((_TestCount+1))
-    if [ $TestSilent == 0 ];then
+    if [[ $TestSilent == 0 ]];then
         local start=`date +%s`
     fi
-    if [ $Test == 0 ];then
+    if [[ $Test == 0 ]];then
         bash -c "#/bin/bash
 set -e
 source \"$1\"
 $2
 "
     fi
-    if [ $TestSilent == 0 ];then
+    if [[ $TestSilent == 0 ]];then
         local end=`date +%s`
         echo " - $2 $((end-start))s"
     fi
 }
 function test_file
 {
-    if [ ! -f "$1" ];then
+    if [[ ! -f "$1" ]];then
         echo "file not exists: $1"
         exit 1
     fi
     _TestFiles=$((_TestFiles+1))
 
     local count=0
-    if [ $TestSilent == 0 ];then
+    if [[ $TestSilent == 0 ]];then
         echo "$1"
         local start=`date +%s`
     fi
@@ -120,7 +120,7 @@ function test_file
         IFS=$ifs
         s=${strs[1]}
 
-        if [ "$TestMethod" == '' ];then
+        if [[ $TestMethod == '' ]];then
             count=$((count+1))
             test_method "$1" "$s"
         elif echo "$s" | egrep -sq "$TestMethod";then
@@ -129,7 +129,7 @@ function test_file
         fi
     done
 
-    if [ $TestSilent == 0 ];then
+    if [[ $TestSilent == 0 ]];then
         local end=`date +%s`
         echo " * $count passed, used $((end-start))s"
     fi
@@ -140,8 +140,8 @@ for file in "$@";do
     tested=1
     test_file "$file"
 done
-if [ $tested == 0 ];then
-    if [ -d "$TestDir" ];then
+if [[ $tested == 0 ]];then
+    if [[ -d "$TestDir" ]];then
         for s in `find "$TestDir" -type f -iname '*_test.sh'`;do
             test_file "$s"
         done

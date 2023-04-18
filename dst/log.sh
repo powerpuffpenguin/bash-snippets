@@ -57,11 +57,11 @@ log_color_fatal='31m'
 function _log_print
 {
     local s="`date '+%F %H:%M:%S'`"
-    if [ "$log_flag_tag" != '' ];then
+    if [[ $log_flag_tag != '' ]];then
         s="$log_flag_tag $s"
     fi
     local caller1=''
-    if [ "$log_flag_line" != 0 ] || [ "$log_flag_sub" != 0 ] || [ "$log_flag_file" != 0 ];then
+    if [[ $log_flag_line != 0 ]] || [[ $log_flag_sub != 0 ]] || [[ $log_flag_file != 0 ]];then
         local line
         local sub
         local file
@@ -72,27 +72,27 @@ function _log_print
                 caller1=`basename "$file"`
             ;;
             2)
-                caller1="$file"
+                caller1=$file
             ;;
         esac
 
-        if [ "$log_flag_line" != 0 ];then
+        if [[ $log_flag_line != 0 ]];then
             caller1="$caller1:$line"
         fi
-        if [ "$log_flag_sub" != 0 ]; then
-            if [ "$caller1" == '' ];then
-                caller1="$sub"
+        if [[ $log_flag_sub != 0 ]]; then
+            if [[ $caller1 == '' ]];then
+                caller1=$sub
             else
                 caller1="$caller1 $sub"
             fi
         fi
 
-        if [ "$caller1" != '' ];then
+        if [[ $caller1 != '' ]];then
             caller1="[$caller1] "
         fi
     fi
 
-    if [ "$log_to_file" != '' ];then
+    if [[ $log_to_file != '' ]];then
         log_write_file "$s $_log_tag $caller1$@"
         return $?
     fi
