@@ -205,6 +205,7 @@ function path_base
 function path_is_abs
 {
     if [[ "${1:0:1 }" != / ]];then
+        result_errno="not an abs path: $1"
         return 1
     fi
 }

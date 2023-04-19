@@ -2,8 +2,8 @@
 set -e
 cd `dirname $BASH_SOURCE`
 
-source log.sh
-source log_writer.sh
+source ../dst/log.sh
+source ../dst/log_writer.sh
 
 log_file_check_times=10
 log_file_size=100

@@ -138,7 +138,7 @@ function log_trace
 function log_debug
 {
     if (($log_flag_level>1));then
-        return 1
+        return 0
     fi
     _log_color="$log_color_debug"
     _log_tag="[debug]"

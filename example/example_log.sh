@@ -2,7 +2,7 @@
 
 cd `dirname $BASH_SOURCE`
 
-source log.sh
+source ../dst/log.sh
 
 # log to file
 log_to_file="example.log"

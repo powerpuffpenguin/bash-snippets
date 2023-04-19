@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # (s, sub): errno
 function strings_end_with
@@ -7,6 +7,7 @@ function strings_end_with
     if ((i>=0)) && [[ "${1:i}" == "$2" ]];then
         return 0
     else
+        result_errno="strings_end_with: false"
         return 1
     fi
 }
@@ -17,6 +18,7 @@ function strings_start_with
     if [[ "${1:0:n}" == "$2" ]];then
         return 0
     else
+        result_errno="strings_start_with: false"
         return 1
     fi
 }

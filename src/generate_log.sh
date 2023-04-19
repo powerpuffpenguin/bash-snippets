@@ -217,7 +217,7 @@ function ${Prefix}trace
 function ${Prefix}debug
 {
     if ((\$${Prefix}flag_level>1));then
-        return 1
+        return 0
     fi
     _${Prefix}color=\"\$${Prefix}color_debug\"
     _${Prefix}tag=\"[debug]\"
