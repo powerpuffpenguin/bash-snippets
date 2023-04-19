@@ -104,30 +104,25 @@ function test_file
     fi
 
     # find test functions
-    set +e
-    local ifs=$IFS
-    IFS="
-"
-    local funcs=(`egrep '^function +test_' "$1"`)
-    IFS=$ifs
-    set -e
     local s
-    local strs
-    for s in "${funcs[@]}";do
-        ifs=$IFS
-        IFS=" {	("
-        strs=($s)
-        IFS=$ifs
-        s=${strs[1]}
-
-        if [[ $TestMethod == '' ]];then
-            count=$((count+1))
-            test_method "$1" "$s"
-        elif echo "$s" | egrep -sq "$TestMethod";then
-            count=$((count+1))
-            test_method "$1" "$s"
+    local func
+    while read -r s func _;do
+        if [[ $s == function ]];then
+            if [[ $func != test_* ]];then
+                continue
+            fi
+        elif [[ $s == test_* ]];then
+            if [[ $s != *\(* ]] && [[ $func != \(* ]];then
+                continue
+            fi
+            func=$s
+        else
+            continue
         fi
-    done
+        func=${func%%(*}
+        count=$((count+1))
+        test_method "$1" "$func"
+    done < "$1"
 
     if [[ $TestSilent == 0 ]];then
         local end=`date +%s`

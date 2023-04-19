@@ -5,8 +5,8 @@ cd `dirname $BASH_SOURCE`
 source assert.sh
 source strings.sh
 
-function test_start_with
-{
+ test_start_with(  )
+ {
     local items=(
         abc ""
         abc a
@@ -34,8 +34,7 @@ function test_start_with
         assert_call_false strings_start_with "${items[i]}" "${items[i+1]}"
     done
 }
-function test_end_with
-{
+test_end_with(){
     local items=(
         abc ""
         abc c
@@ -64,7 +63,7 @@ function test_end_with
         assert_call_false strings_end_with "${items[i]}" "${items[i+1]}"
     done
 }
-function test_index_ofchar
+ test_index_ofchar ( )
 {
     local items=(
         "12345" "a" -1
