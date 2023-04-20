@@ -1,4 +1,8 @@
 #!/bin/bash
+if [[ -v strings_version ]] && [[ $strings_version == 1 ]];then
+    return
+fi
+strings_version=1
 
 # (s, sub): errno
 function strings_end_with

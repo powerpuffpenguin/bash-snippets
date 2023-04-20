@@ -78,6 +78,11 @@ while true; do
 done
 
 create_file "#/bin/bash
+if [[ -v \$${Prefix}writer_version ]] && [[ \$${Prefix}writer_version == 1 ]];then
+    return
+fi
+${Prefix}writer_version=1
+
 __${Prefix}name=''
 __${Prefix}index=0
 __${Prefix}ext=''

@@ -1,4 +1,9 @@
 #/bin/bash
+if [[ -v $log_version ]] && [[ $log_version == 1 ]];then
+    return
+fi
+log_version=1
+
 # if != '', print log to this file
 log_to_file=''
 # you can override how to write log to file

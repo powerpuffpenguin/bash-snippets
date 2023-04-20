@@ -1,4 +1,9 @@
 #/bin/bash
+if [[ -v $log_writer_version ]] && [[ $log_writer_version == 1 ]];then
+    return
+fi
+log_writer_version=1
+
 __log_name=''
 __log_index=0
 __log_ext=''

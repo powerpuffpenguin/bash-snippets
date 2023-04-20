@@ -1,4 +1,8 @@
 #/bin/bash
+if [[ -v path_version ]] && [[ $path_version == 1 ]];then
+    return
+fi
+path_version=1
 
 # returns the name without the extension
 # (filepath: string) (name: string, ext: string)

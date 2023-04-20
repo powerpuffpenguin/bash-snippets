@@ -1,4 +1,8 @@
 #!/bin/bash
+if [[ -v const_version ]] && [[ $const_version == 1 ]];then
+    return
+fi
+const_version=1
 
 # false: '' or 'false' or 'FALSE' or 0
 # true: != ('' or 'false' or 'FALSE' or 0)

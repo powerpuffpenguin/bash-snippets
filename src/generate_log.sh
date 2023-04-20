@@ -78,6 +78,11 @@ while true; do
 done
 
 create_file "#/bin/bash
+if [[ -v \$${Prefix}version ]] && [[ \$${Prefix}version == 1 ]];then
+    return
+fi
+${Prefix}version=1
+
 # if != '', print log to this file
 ${Prefix}to_file=''
 # you can override how to write log to file
