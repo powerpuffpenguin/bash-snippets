@@ -116,7 +116,7 @@ function strings_join
         result="$result$s"
     done
 }
-# (separator,s...): string
+# (separator: string, ...s: Array<string>): string
 function strings_join_with
 {
     result=''

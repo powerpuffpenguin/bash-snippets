@@ -49,7 +49,8 @@ function __assert_error
     exit 1
 }
 
-# (expect, actual, msg...)
+# (expect, actual, ...msg)
+# assert $expect == $actual
 function assert_equal
 {
     if [[ $1 == $2 ]];then
@@ -62,8 +63,8 @@ function assert_equal
     __assert_error "Not equal:" "$expect" "$actual" "$@"
 }
 
+# (actual, ...msg)
 # assert actual == '' or 'false' or 'FALSE' or 0
-# (actual, msg...)
 function assert_false
 {
     if [[ $1 == '' ]] || [[ $1 == false ]] || [[ $1 == FALSE ]] || [[ $1 == 0 ]];then
@@ -75,8 +76,8 @@ function assert_false
     __assert_error "Should be false" "'' or false or FALSE or 0" "$actual" "$@"
 }
 
+# (actual, ...msg)
 # assert actual != ('' or 'false' or 'FALSE' or 0)
-# (actual, msg...)
 function assert_true
 {
     if [[ $1 == '' ]] || [[ $1 == false ]] || [[ $1 == FALSE ]] || [[ $1 == 0 ]];then
@@ -85,8 +86,8 @@ function assert_true
         __assert_error "Should be true" "!= ('' or false or FALSE or 0)" "$actual" "$@"
     fi
 }
-# assert f(args...) == expect
-# (expect, f, args...)
+# (expect, f, ...args)
+# assert f(...args) && $result == $expect
 function assert_call_equal
 {
     local expect=$1
@@ -107,9 +108,8 @@ function assert_call_equal
         __assert_error "Function '$f' return not equal:" "$expect" "$result" "$msg"
     fi
 }
-
-# assert f(args) bash return 0
-# (f, args...)
+# (f, ...args)
+# assert f(...args)
 function assert_call_true
 {
     local f=$1
@@ -125,8 +125,8 @@ function assert_call_true
         __assert_error "Function '$f' should be return true" true false "$msg"
     fi
 }
-# assert f(args) bash return != 0
-# (f, args...)
+# (f, ...args)
+# assert ! f(...args)
 function assert_call_false
 {
     local f=$1
@@ -136,9 +136,6 @@ function assert_call_false
     local msg="$f($s)"
 
     if "$f" "$@";then
-        if [[ $result_errno != '' ]];then
-            msg="$msg => $result_errno"
-        fi
         __assert_error "Function '$f' should be return false" false true "$msg"
     fi
 }
