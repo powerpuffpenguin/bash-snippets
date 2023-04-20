@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ -v strings_version ]] && [[ $strings_version == 1 ]];then
+if [[ -v strings_version ]] && [[ $strings_version =~ ^[0-9]$ ]] && ((strings_version>=1));then
     return
 fi
 strings_version=1

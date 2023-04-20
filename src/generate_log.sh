@@ -78,7 +78,7 @@ while true; do
 done
 
 create_file "#/bin/bash
-if [[ -v \$${Prefix}version ]] && [[ \$${Prefix}version == 1 ]];then
+if [[ -v \$${Prefix}version ]] && [[ \$${Prefix}version =~ ^[0-9]\$ ]] && ((${Prefix}version>1));then
     return
 fi
 ${Prefix}version=1

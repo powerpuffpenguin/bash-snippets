@@ -1,5 +1,5 @@
 #/bin/bash
-if [[ -v path_version ]] && [[ $path_version == 1 ]];then
+if [[ -v path_version ]] && [[ $path_version =~ ^[0-9]$ ]] && ((path_version>=1));then
     return
 fi
 path_version=1

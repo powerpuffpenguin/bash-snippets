@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ -v assert_version ]] && [[ $assert_version == 1 ]];then
+if [[ -v assert_version ]] && [[ $assert_version =~ ^[0-9]$ ]] && ((assert_version>=1));then
     return
 fi
 assert_version=1

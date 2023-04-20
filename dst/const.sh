@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ -v const_version ]] && [[ $const_version == 1 ]];then
+if [[ -v const_version ]] && [[ $const_version =~ ^[0-9]$ ]] && ((const_version>=1));then
     return
 fi
 const_version=1

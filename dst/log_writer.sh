@@ -1,5 +1,5 @@
 #/bin/bash
-if [[ -v $log_writer_version ]] && [[ $log_writer_version == 1 ]];then
+if [[ -v $log_writer_version ]] && [[ $log_writer_version =~ ^[0-9]$ ]] && ((log_writer_version>1));then
     return
 fi
 log_writer_version=1
