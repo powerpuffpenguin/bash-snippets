@@ -16,6 +16,9 @@ function bool_true
 {
     if [[ "$1" == '' ]] || [[ "$1" == false ]] || [[ "$1" == FALSE ]] || [[ "$1" == 0 ]];then
         result_errno="not true: $1"
+        if [[ $- == *e* ]];then
+            echo "$result_errno"
+        fi
         return 1
     else
         return 0
@@ -28,6 +31,9 @@ function bool_false
         return 0
     else
         result_errno="not false: $1"
+        if [[ $- == *e* ]];then
+            echo "$result_errno"
+        fi
         return 1
     fi
 }
@@ -59,6 +65,9 @@ function duration_string
 
     if [[ ! $1 =~ ^[0-9]+$ ]]; then
         result_errno="not a duration: $1"
+        if [[ $- == *e* ]];then
+            echo "$result_errno"
+        fi
         return 1
     fi
     local v=$1
@@ -109,6 +118,9 @@ function duration_parse
             d)
                 if [[ $v == '' ]];then
                     result_errno="not a duration string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v*86400))
@@ -117,6 +129,9 @@ function duration_parse
             h)
                 if [[ $v == '' ]];then
                     result_errno="not a duration string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v*3600))
@@ -125,6 +140,9 @@ function duration_parse
             m)
                 if [[ $v == '' ]];then
                     result_errno="not a duration string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v*60))
@@ -133,6 +151,9 @@ function duration_parse
             s)
                 if [[ $v == '' ]];then
                     result_errno="not a duration string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v))
@@ -140,6 +161,9 @@ function duration_parse
             ;;
             *)
                 result_errno="not a duration string: $1"
+                if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                 return 1
             ;;
         esac
@@ -148,6 +172,9 @@ function duration_parse
         result=$sum
     else
         result_errno="not a duration string: $1"
+        if [[ $- == *e* ]];then
+            echo "$result_errno"
+        fi
         return 1
     fi
 }
@@ -165,6 +192,9 @@ function size_string
     result=''
     if [[ ! $1 =~ ^[0-9]+$ ]]; then
         result_errno="not a size: $1"
+        if [[ $- == *e* ]];then
+            echo "$result_errno"
+        fi
         return 1
     fi
 
@@ -220,6 +250,9 @@ function size_parse
             t)
                 if [[ $v == '' ]];then
                     result_errno="not a size string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v*1099511627776))
@@ -228,6 +261,9 @@ function size_parse
             g)
                 if [[ $v == '' ]];then
                     result_errno="not a size string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v*1073741824))
@@ -236,6 +272,9 @@ function size_parse
             m)
                 if [[ $v == '' ]];then
                     result_errno="not a size string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v*1048576))
@@ -244,6 +283,9 @@ function size_parse
             k)
                 if [[ $v == '' ]];then
                     result_errno="not a size string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v*1024))
@@ -252,6 +294,9 @@ function size_parse
             b)
                 if [[ $v == '' ]];then
                     result_errno="not a size string: $1"
+                    if [[ $- == *e* ]];then
+                        echo "$result_errno"
+                    fi
                     return 1
                 fi
                 sum=$((sum+v))
@@ -259,6 +304,9 @@ function size_parse
             ;;
             *)
                 result_errno="not a size string: $1"
+                if [[ $- == *e* ]];then
+                    echo "$result_errno"
+                fi
                 return 1
             ;;
         esac
@@ -267,6 +315,9 @@ function size_parse
         result=$sum
     else
         result_errno="not a size string: $1"
+        if [[ $- == *e* ]];then
+            echo "$result_errno"
+        fi
         return 1
     fi
 }

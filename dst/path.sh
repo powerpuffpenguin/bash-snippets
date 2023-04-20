@@ -206,6 +206,9 @@ function path_is_abs
 {
     if [[ "${1:0:1 }" != / ]];then
         result_errno="not an abs path: $1"
+        if [[ $- == *e* ]];then
+            echo "$result_errno"
+        fi
         return 1
     fi
 }

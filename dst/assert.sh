@@ -35,8 +35,9 @@ function __assert_error
     __assert_print "" "actual  : $3"
 
     shift 3
-    if [[ "$@" != '' ]];then
-        __assert_print "Message:" "$@"
+    local msg="$@"
+    if [[ $msg != '' ]];then
+        __assert_print "Message:" "$msg"
     fi
 
     __assert_print "Test:" "$sub"
@@ -91,6 +92,9 @@ function assert_call_equal
     local msg="$f($s)"
 
     if ! "$f" "$@";then
+        if [[ $result_errno != '' ]];then
+            msg="$msg => $result_errno"
+        fi
         __assert_error "Function '$f' should be return true" true false "$msg"
         return $?
     fi
@@ -110,6 +114,9 @@ function assert_call_true
     local msg="$f($s)"
 
     if ! "$f" "$@";then
+        if [[ $result_errno != '' ]];then
+            msg="$msg => $result_errno"
+        fi
         __assert_error "Function '$f' should be return true" true false "$msg"
     fi
 }
@@ -124,6 +131,9 @@ function assert_call_false
     local msg="$f($s)"
 
     if "$f" "$@";then
+        if [[ $result_errno != '' ]];then
+            msg="$msg => $result_errno"
+        fi
         __assert_error "Function '$f' should be return false" false true "$msg"
     fi
 }

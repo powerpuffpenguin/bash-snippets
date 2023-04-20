@@ -25,8 +25,8 @@ bash 中模擬 namespace/package)，但後來發現這樣反而使 bash
 返回字符串，本庫採用全局變量的方式爲函數返回內容(echo
 無法返回數組，並且在函數出錯時也難以 return errno 通知調用者函數錯誤)
 
-1. 如果函數是判別式則使用 `return errno` 返回，並將錯誤描述設置到
-   `result_errno=...`
+1. 如果函數是判別式則使用 `return errno` 返回。如果 -e 會同時將錯誤描述打印到
+   stdout，否則錯誤描述設置到 `result_errno=...`
 2. 如果函數存在返回值則設置變量 `result=...` 作爲返回值
 
 ```
