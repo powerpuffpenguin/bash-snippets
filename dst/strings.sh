@@ -8,9 +8,6 @@ function strings_end_with
         return 0
     else
         result_errno="strings_end_with: false"
-        if [[ $- == *e* ]];then
-            echo "$result_errno"
-        fi
         return 1
     fi
 }
@@ -22,9 +19,6 @@ function strings_start_with
         return 0
     else
         result_errno="strings_start_with: false"
-        if [[ $- == *e* ]];then
-            echo "$result_errno"
-        fi
         return 1
     fi
 }

@@ -4,13 +4,13 @@ cd `dirname $BASH_SOURCE`
 source ../dst/command.sh
 
 # define a command as root command
-command_new "$BASH_SOURCE" 'Example for command.sh'
+command_new "$BASH_SOURCE" '' 'Example for command.sh'
 root=$result
 
 
 # define a command as a subcommand
 define_version(){
-    command_new version
+    command_new version execute_version "version info"
 
 
     # add to parent
@@ -22,14 +22,14 @@ execute_version(){ # callbackup for command version
 }
 
 # define a command as a subcommand
-define_help(){
-    command_new help
+define_start(){
+    command_new start execute_start "start the service"
 
     # add to parent
     command_subcommands $root $result
 }
-define_help
-execute_help(){ # callbackup for command help
+define_start
+execute_start(){ # callbackup for command help
     echo help
 }
 

@@ -81,6 +81,7 @@ function test_method
         bash -c "#/bin/bash
 set -e
 source \"$1\"
+set +e
 $2
 "
     fi

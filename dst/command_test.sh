@@ -1,24 +1,12 @@
 #!/bin/bash
+set -e
 cd `dirname $BASH_SOURCE`
 
 source assert.sh
 source command.sh
 
-unset_e(){
-    if [[ $- == *e* ]];then
-        __command_test_set_e=1
-        set +e
-    fi
-}
-set_e(){
-    if [[ $__command_test_set_e == 1 ]];then
-        __command_test_set_e=0
-        set -e
-    fi
-}
 
  test_subcommands(){
-    unset_e
     assert_call_false command_subcommands abc 1
     assert_equal "id invalid: abc" "$result_errno" "command_subcommands(abc, 1)"
     local id=$__command_id
@@ -35,8 +23,6 @@ set_e(){
     id=$((root+1))
     assert_call_false command_subcommands $root $id
     assert_equal "command id not defined: $id" "$result_errno" "command_subcommands($root, $id)"
-
-    set_e
 }
 
  test_get(){
