@@ -1,4 +1,9 @@
 #!/bin/bash
+if [[ -v assert_version ]] && [[ $assert_version == 1 ]];then
+    return
+fi
+assert_version=1
+
 function __assert_join_args 
 {
     s=''

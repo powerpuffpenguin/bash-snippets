@@ -1,4 +1,8 @@
 #!/bin/bash
+if [[ -v command_version ]] && [[ $command_version == 1 ]];then
+    return
+fi
+command_version=1
 
 # current command id
 __command_id=0
