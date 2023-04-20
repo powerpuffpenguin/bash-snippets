@@ -110,6 +110,21 @@ _test.sh
 爲後綴的檔案，你可以參考它們來寫單元測試代碼，[dst/assert.sh](document/zh/assert.md)
 提供了一些簡化測試代碼的函數。
 
+查看使用說明：
+
 ```
 ./test.sh -h
+```
+
+測試指定檔案：
+
+```
+./test.sh dst/strings_test.sh dst/path_test.sh
+```
+
+測試檔案夾下所有測試檔案(*_test.sh)：
+
+```
+./test.sh
+./test.sh -d dst
 ```

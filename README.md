@@ -120,6 +120,21 @@ _test.sh under the dst folder, you can refer to them to write unit test code,
 [dst/assert.sh](document/en/assert.md) some functions are provided to simplify
 the test code.
 
+View instructions for use:
+
 ```
 ./test.sh -h
+```
+
+Test specified file:
+
+```
+./test.sh dst/strings_test.sh dst/path_test.sh
+```
+
+Test all files (*_test.sh) under the specified folder:
+
+```
+./test.sh
+./test.sh -d dst
 ```
