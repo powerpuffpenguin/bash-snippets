@@ -4,7 +4,7 @@ if [[ -v strings_version ]] && [[ $strings_version =~ ^[0-9]$ ]] && ((strings_ve
 fi
 strings_version=1
 
-# (s, sub): errno
+# (s: string, suffix: string): errno
 function strings_end_with
 {
     local i=$((${#1}-${#2}))
@@ -15,7 +15,7 @@ function strings_end_with
         return 1
     fi
 }
-# (s, sub): errno
+# (s: string, prefix: string): errno
 function strings_start_with
 {
     local n=${#2}
@@ -27,8 +27,8 @@ function strings_start_with
     fi
 }
 
+# (s: string, chars: string): number
 # if not found return -1
-# (s, chars): number
 function strings_index_ofchar
 {
     result=-1
@@ -62,8 +62,8 @@ function strings_index_ofchar
     done
 }
 
+# (s: string, chars: string): number
 # if not found return -1
-# (s, chars): number
 function strings_last_ofchar
 {
     result=-1
@@ -97,8 +97,9 @@ function strings_last_ofchar
     done
 }
 
+
+# (s: string, separator_chars: string): []string
 # split string
-# (s, separators): []string
 function strings_split
 {
     local ifs=$IFS
@@ -107,7 +108,7 @@ function strings_split
     IFS=$ifs
 }
 
-# (s...): string
+# (...s: []string): string
 function strings_join
 {
     result=''
@@ -116,7 +117,7 @@ function strings_join
         result="$result$s"
     done
 }
-# (separator: string, ...s: Array<string>): string
+# (separator: string, ...s: []string): string
 function strings_join_with
 {
     result=''

@@ -86,7 +86,7 @@ function strings_split(s: string, separators: string): []string
 > 'separators', and the function returns a string array after separating 's'.
 
 ```
-(separator: string, ...s: Array<string>): string
+(separator: string, ...s: []string): string
 ```
 
 > The above declaration omits the function name, which is usually written above

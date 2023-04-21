@@ -79,7 +79,7 @@ function strings_split(s: string, separators: string): []string
 > separators，函數將 s 分隔後返回一個字符串數組。
 
 ```
-(separator: string, ...s: Array<string>): string
+(separator: string, ...s: []string): string
 ```
 
 > 上面的聲明省略了函數名，這種寫法通常在源代碼的函數上方，因爲源碼中已經存在了名稱，此外

@@ -5,3 +5,4 @@
 # api
 
 - [assert](assert.md) 簡化單元測試的斷言
+- [strings](strings.md) 字符串處理

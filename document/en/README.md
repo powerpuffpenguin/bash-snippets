@@ -5,3 +5,4 @@
 # api
 
 - [assert](assert.md) Assertions to simplify unit testing
+- [strings](strings.md) String handling
