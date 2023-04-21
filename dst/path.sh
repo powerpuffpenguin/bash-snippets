@@ -4,8 +4,8 @@ if [[ -v path_version ]] && [[ $path_version =~ ^[0-9]$ ]] && ((path_version>=1)
 fi
 path_version=1
 
-# returns the name without the extension
 # (filepath: string) (name: string, ext: string)
+# returns the name without the extension
 function path_split_name
 {
     result=(
@@ -28,21 +28,21 @@ function path_split_name
     done
 }
 
-# returns the name without the extension
 # (filepath: string): string
+# returns the name without the extension
 function path_name
 {
     path_split_name "$1"
     result="${result[0]}"
 }
-# return extension name
 # (filepath: string): string
+# return extension name
 function path_ext
 {
     path_split_name "$1"
     result="${result[1]}"
 }
-# (filepath: string): string
+# (path: string): string
 # Clean returns the shortest path name equivalent to path
 # by purely lexical processing. It applies the following rules
 # iteratively until no further processing can be done:
@@ -150,7 +150,7 @@ function path_clean
 	fi
 }
 
-# (filepath: string) (dir: string, name: string)
+# (path: string) (dir: string, name: string)
 function path_split
 {
     result=(
@@ -170,14 +170,14 @@ function path_split
         fi
     done
 }
-# (filepath: string): string
+# (path: string): string
 function path_dir
 {
     path_split "$1"
     path_clean "${result[0]}"
 }
 
-# (filepath: string): string
+# (path: string): string
 # Returns the last element of path.
 # Trailing slashes are removed before extracting the last element.
 # If the path is empty, path_base returns ".".
@@ -205,7 +205,7 @@ function path_base
         result=/
     fi
 }
-# (filepath: string): errno
+# (path: string): errno
 function path_is_abs
 {
     if [[ "${1:0:1 }" != / ]];then
@@ -213,7 +213,7 @@ function path_is_abs
         return 1
     fi
 }
-# (elem ...): string
+# (...elem: []string): string
 function path_join
 {
     result=''

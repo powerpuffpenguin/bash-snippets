@@ -17,12 +17,12 @@ source dst/assert.sh
 - [assert_call_true](#assert_call_true)
 - [assert_call_false](#assert_call_false)
 
-assert The provided functions should usually only be used in unit tests, they
+Assert The provided functions should usually only be used in unit tests, they
 are used to assert that certain conditions are met, and if the conditions are
 not true, they will exit immediately after printing the call information and
 error `exit 1`
 
-assert provides two types of assertions assert_XXX and assert_call_XXX
+Assert provides two types of assertions assert_XXX and assert_call_XXX
 
 - assert_XXX asserts that a condition holds
 - assert_call_XXX will proxy access to a function, assert that the function will

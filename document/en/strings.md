@@ -67,7 +67,7 @@ return the separated array
 function strings_join(...s: []string): string
 ```
 
-concatenates the string arrays s together and returns the concatenated string
+Concatenates the string arrays s together and returns the concatenated string
 
 # strings_join_with
 
