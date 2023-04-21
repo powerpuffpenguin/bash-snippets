@@ -1,6 +1,6 @@
 [api](README.md)
 
-[English](../zh/path.md)
+[中文](../zh/path.md)
 
 # path
 
@@ -119,4 +119,7 @@ If path is an absolute path return `return 0`, otherwise return `return 1`
 function path_join(...elem: []string): string
 ```
 
-Join joins any number of path elements into a single path, separating them with slashes. Empty elements are ignored. The result is Cleaned. However, if the argument list is empty or all its elements are empty, Join returns an empty string.
+Join joins any number of path elements into a single path, separating them with
+slashes. Empty elements are ignored. The result is Cleaned. However, if the
+argument list is empty or all its elements are empty, Join returns an empty
+string.

@@ -1,6 +1,6 @@
 [api](README.md)
 
-[English](../zh/log.md)
+[中文](../zh/log.md)
 
 # log
 
@@ -11,6 +11,8 @@ source dst/log.sh
 ```
 
 - [generate_log.sh](#generate_log)
+
+[example](https://github.com/powerpuffpenguin/bash-snippets/blob/main/example/example_log.sh)
 
 variable list:
 
