@@ -43,12 +43,6 @@ and it is difficult to return the error reason when the function fails).
    an error code `return errno`
 2. If the function has a return value, set the return content to the variable
    `result=...`
-3. If the '-e' option is specified in bash, most functions will be executed
-   automatically on error `echo "$result_errno"` and then return `return errno`
-
-> rule 3 is to automatically print error messages when bash specifies the '-e'
-> parameter. But for discriminant functions usually used with if they don't
-> automatically output errors to stdout
 
 ```
 # return value
