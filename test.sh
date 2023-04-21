@@ -65,17 +65,78 @@ while true; do
         ;;
     esac 
 done
-
+function date_now
+{
+    echo `date +%s`.`date +%N`
+}
+function trim_start_0
+{
+    local i=0
+    local n=${#1}
+    for ((;i<n;i++));do
+        if [[ ${1:i:1} != 0 ]];then
+          local s=${1:i}
+          if [[ $s == '' ]];then
+            echo 0
+            return
+          fi
+          echo $s
+          return
+        fi
+    done
+    echo 0
+}
+function trim_end_0
+{
+    local i=${#1}
+    for ((i=i-1;i>=0;i--));do
+        if [[ ${1:i:1} != 0 ]];then
+          local s=${1:0:i}
+          if [[ $s == '' ]];then
+            echo 0
+            return
+          fi
+          echo $s
+          return
+        fi
+    done
+    echo 0
+}
+function date_used
+{
+    local s=$1
+    local s0=${s%%.*}
+    local ns0=${s##*.}
+    ns0=`trim_start_0 $ns0`
+    s=`date_now`
+    local s1=${s%%.*}
+    local ns1=${s##*.}
+    ns1=`trim_start_0 $ns1`
+    if ((ns1>ns0));then
+        s=$((s1-s0))
+        local ns=$((ns1-ns0))
+    else
+        s=$((s1- s0-1))
+        local ns=$((ns1+1000000000-ns0))
+    fi
+    ns=`printf '%09d' $ns`
+    ns=`trim_end_0 $ns`
+    if [[ $ns == 0 ]];then
+        echo $s
+    else
+        echo $s.$ns
+    fi
+}
 # alreay test count
 _TestCount=0
 # alreay test files
 _TestFiles=0
-start=`date +%s`
+start=`date_now`
 function test_method
 {
     _TestCount=$((_TestCount+1))
     if [[ $TestSilent == 0 ]];then
-        local start=`date +%s`
+        local start=`date_now`
     fi
     if [[ $Test == 0 ]];then
         bash -c "#/bin/bash
@@ -86,8 +147,7 @@ $2
 "
     fi
     if [[ $TestSilent == 0 ]];then
-        local end=`date +%s`
-        echo " - $2 $((end-start))s"
+        echo " - $2 `date_used $start`s"
     fi
 }
 function test_file
@@ -101,7 +161,7 @@ function test_file
     local count=0
     if [[ $TestSilent == 0 ]];then
         echo "$1"
-        local start=`date +%s`
+        local start=`date_now`
     fi
 
     # find test functions
@@ -126,8 +186,7 @@ function test_file
     done < "$1"
 
     if [[ $TestSilent == 0 ]];then
-        local end=`date +%s`
-        echo " * $count passed, used $((end-start))s"
+        echo " * $count passed, used `date_used $start`s"
     fi
 }
 
@@ -146,5 +205,4 @@ if [[ $tested == 0 ]];then
         exit 1
     fi
 fi
-end=`date +%s`
-echo "test $_TestFiles files, $_TestCount passed, used $((end-start))s"
+echo "test $_TestFiles files, $_TestCount passed, used `date_used $start`s"
