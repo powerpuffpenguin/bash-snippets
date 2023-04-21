@@ -4,6 +4,7 @@
 
 # api
 
+- [core](core.md) Core code that affects programming style
 - [assert](assert.md) Assertions to simplify unit testing
 - [strings](strings.md) String handling
 - [path](path.md) Manipulating slash-separated paths

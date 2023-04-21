@@ -3,6 +3,23 @@ if [[ -v core_version ]] && [[ $core_version =~ ^[0-9]$ ]] && ((core_version>=1)
     return
 fi
 core_version=1
+
+
+# (...msg)
+# 'exit 1' after message and call stack
+core_panic(){
+    local i=0
+    echo "Panic: $@"
+    while true; do
+        if ! read line sub file < <(caller $i);then
+            break
+        fi
+        i=$((i+1))
+        echo "  - $file $sub:$line"
+    done
+    exit 1
+}
+
 __core_check_function(){
     if [[ ! $1 =~ ^[0-9_a-zA-Z\.,]+$ ]];then
         core_panic "function name invalid: $1"
@@ -96,27 +113,11 @@ __core_getopt() {
     fi
 }
 
-# (...msg)
-# 'exit 1' after message and call stack
-core_panic(){
-    local i=0
-    echo "Panic: $@"
-    while true; do
-        if ! read line sub file < <(caller $i);then
-            break
-        fi
-        i=$((i+1))
-        echo "  - $file $sub:$line"
-    done
-    exit 1
-}
-
-# proxy access to a function
+# proxy access to a command
 # -f name args...
 # ?-a # assert not error, if any error exit bash
 # ?-t # trace on error
 # ?-c # output caller on trace
-# ?-f # exit $? on fatal
 # ?-v varname # result var name
 # ?-e varname # result_errno var name
 core_call(){
@@ -134,9 +135,13 @@ core_call(){
     fi
     if [[ $var_result != '' ]];then
         local result
+    else
+        result=''
     fi
     if [[ $var_errno != '' ]];then
         local result_errno
+    else
+        result_errno=''
     fi
     local errno=0
     if "$name" "${args[@]}";then
@@ -173,4 +178,15 @@ core_call(){
         exit $errno
     fi
     return $errno
+}
+
+# (f: string, ...args)
+# core_call -tcf "$@" 
+core_call_default(){
+    core_call -tcf "$@"
+}
+# (f: string, ...args)
+# core_call -atcf "$@" 
+core_call_assert(){
+    core_call -atcf "$@"
 }

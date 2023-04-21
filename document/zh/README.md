@@ -4,6 +4,7 @@
 
 # api
 
+- [core](core.md) 影響編程風格的核心代碼
 - [assert](assert.md) 簡化單元測試的斷言
 - [strings](strings.md) 字符串處理
 - [path](path.md) 純語法分析的路徑處理

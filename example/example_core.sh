@@ -22,4 +22,5 @@ core_call -f error test
 
 core_call -tf error test print trace on error
 
-core_call -tcf error test print trace caller on error
+core_call_default error test print trace caller on error
+echo "all end"
