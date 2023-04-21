@@ -181,3 +181,81 @@ log_color_fatal='31m'
 ```
 
 將 fatal 等級的日誌輸出到 stdout 時使用的顏色
+
+# log_write_file
+
+```
+function log_write_file(...args)
+{
+    echo "$@" >> "$log_to_file"
+}
+```
+
+這個函數只是簡單的將日誌寫入到檔案，你可以重寫這個函數來實現日誌輪替
+
+# log_after_stdout
+
+```
+function log_after_stdout(...args)
+{
+    return 0
+}
+```
+
+這個函數默認什麼都不做，但你可以重載它來實現同時將日誌輸出到 stdout
+或其它地方，在日誌輸出到 stdout 後這個函數會被回調
+
+```
+function log_after_stdout(...args)
+{
+    echo "$@" >> your_log_filepath
+}
+```
+
+# log_trace
+
+```
+log_trace(...msg)
+```
+
+輸出等級爲 trace 的日誌
+
+# log_debug
+
+```
+log_debug(...msg)
+```
+
+輸出等級爲 debug 的日誌
+
+# log_info
+
+```
+log_info(...msg)
+```
+
+輸出等級爲 info 的日誌
+
+# log_warn
+
+```
+log_warn(...msg)
+```
+
+輸出等級爲 warn 的日誌
+
+# log_error
+
+```
+log_error(...msg)
+```
+
+輸出等級爲 error 的日誌
+
+# log_fatal
+
+```
+log_fatal(...msg)
+```
+
+輸出等級爲 fatal 的日誌

@@ -8,3 +8,4 @@
 - [strings](strings.md) String handling
 - [path](path.md) Manipulating slash-separated paths
 - [log](log.md) logging
+  - [log_writer](log_writer.md) log rotation

@@ -183,3 +183,82 @@ log_color_fatal='31m'
 ```
 
 The color to use when outputting fatal level logs to stdout
+
+# log_write_file
+
+```
+function log_write_file(...args)
+{
+    echo "$@" >> "$log_to_file"
+}
+```
+
+This function simply writes the log to the file, you can override this function
+to implement log rotation
+
+# log_after_stdout
+
+```
+function log_after_stdout(...args)
+{
+    return 0
+}
+```
+
+This function does nothing by default, but you can override it to also log to
+stdout or elsewhere, this function will be called back after logging to stdout
+
+```
+function log_after_stdout(...args)
+{
+    echo "$@" >> your_log_filepath
+}
+```
+
+# log_trace
+
+```
+log_trace(...msg)
+```
+
+Output logs with level trace
+
+# log_debug
+
+```
+log_debug(...msg)
+```
+
+Output logs with level debug
+
+# log_info
+
+```
+log_info(...msg)
+```
+
+Output logs with level info
+
+# log_warn
+
+```
+log_warn(...msg)
+```
+
+Output logs with level warn
+
+# log_error
+
+```
+log_error(...msg)
+```
+
+Output logs with level error
+
+# log_fatal
+
+```
+log_fatal(...msg)
+```
+
+Output logs with level fatal
