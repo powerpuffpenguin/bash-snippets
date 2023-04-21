@@ -76,6 +76,10 @@ while true; do
         ;;
     esac 
 done
+if [[ ! $Prefix =~ ^[a-zA-Z][a-zA-Z0-9\_]*$ ]];then
+    echo "prefix invalid: $Prefix"
+    exit 1
+fi
 
 create_file "#/bin/bash
 if [[ -v \$${Prefix}writer_version ]] && [[ \$${Prefix}writer_version =~ ^[0-9]\$ ]] && ((${Prefix}writer_version>1));then

@@ -12,6 +12,7 @@ function print_flag
 
 Prefix="log_"
 Output="log.sh"
+TAG="[DEFAULT]"
 Test=0
 function help
 {
@@ -22,6 +23,7 @@ function help
     echo
     echo "Flags:"
     print_flag "-p, --prefix" "function name prefix (default \"$Prefix\")"
+    print_flag "-T, --tag" "log tag (default \"$TAG\")"
     print_flag "-o, --output" "generate the output file of the code (default \"$Output\")"
     print_flag "-t, --test" "only output generated code to the stdout but don't actually write to the output file"
     print_flag "-h, --help" "help for $Command"
@@ -44,7 +46,7 @@ function write_file
     fi
 }
 
-ARGS=`getopt -o hp:o:t --long help,prefix:output:test -n "$Command" -- "$@"`
+ARGS=`getopt -o hp:o:tT: --long help,prefix:output:test,tag: -n "$Command" -- "$@"`
 eval set -- "${ARGS}"
 
 while true; do
@@ -54,11 +56,15 @@ while true; do
             exit 0
         ;;
         -p|--prefix)
-            Prefix="$2"
+            Prefix=$2
+            shift 2
+        ;;
+        -T|--tag)
+            TAG=$2
             shift 2
         ;;
         -o|--output)
-            Output="$2"
+            Output=$2
             shift 2
         ;;
         -t|--test)
@@ -76,6 +82,10 @@ while true; do
         ;;
     esac 
 done
+if [[ ! $Prefix =~ ^[a-zA-Z][a-zA-Z0-9\_]*$ ]];then
+    echo "prefix invalid: $Prefix"
+    exit 1
+fi
 
 create_file "#/bin/bash
 if [[ -v \$${Prefix}version ]] && [[ \$${Prefix}version =~ ^[0-9]\$ ]] && ((${Prefix}version>1));then
@@ -97,7 +107,7 @@ function ${Prefix}after_stdout
 }
 
 # if != '', print log tag
-${Prefix}flag_tag='[DEFAULT]'
+${Prefix}flag_tag='$TAG'
 
 # if != 0, print log line
 ${Prefix}flag_line=1
