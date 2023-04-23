@@ -236,5 +236,5 @@ time_used(){
 # returns the time elapsed since 'from'
 time_since(){
     time_unix
-    time_used $1 "$result"
+    time_used "$1" "$result"
 }
