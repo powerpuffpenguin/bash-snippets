@@ -26,8 +26,7 @@ function __size_string
     fi
 }
 
-# errno
-# (size: number): string
+# (size: number) (s: string, errno)
 function size_string
 {
     result=''
@@ -68,8 +67,7 @@ function size_string
     fi
 }
 
-# errno
-# (s: string): number
+# (s: string) (size: number, errno)
 function size_parse
 {
     result=''
