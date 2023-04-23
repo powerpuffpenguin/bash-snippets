@@ -142,14 +142,13 @@ __time_trim_start_0(){
         if [[ ${1:i:1} != 0 ]];then
           local s=${1:i}
           if [[ $s == '' ]];then
-            echo 0
-            return
+            break
           fi
-          echo $s
+          result=$s
           return
         fi
     done
-    echo 0
+    result=0
 }
 __time_trim_end_0(){
     local i=${#1}
@@ -157,14 +156,13 @@ __time_trim_end_0(){
         if [[ ${1:i:1} != 0 ]];then
           local s=${1:0:i+1}
           if [[ $s == '' ]];then
-            echo 0
-            return
+            break
           fi
-          echo $s
+          result=$s
           return
         fi
     done
-    echo 0
+    result=0
 }
 
 # (from: unix, to: unix): string
@@ -187,10 +185,10 @@ time_used(){
         result_errno="parameter 'from' not a valid unix string: $2"
         return 1
     fi
-    local ns0=${1##*.}
-    ns0=`__time_trim_start_0 $ns0`
-    local ns1=${2##*.}
-    ns1=`__time_trim_start_0 $ns1`
+    __time_trim_start_0 ${1##*.}
+    local ns0=$result
+    __time_trim_start_0 ${2##*.}
+    local ns1=$result
 
     if ((ns1>=ns0));then
         local s=$((s1-s0))
@@ -202,14 +200,41 @@ time_used(){
     if [[ $ns == 0 ]];then
         result=$s
     else
-        ns=`printf '%09d' $ns`
-        ns=`__time_trim_end_0 $ns`
-        result=$s.$ns
+        case ${#ns} in
+            1)
+                ns="00000000$ns"
+            ;;
+            2)
+                ns="0000000$ns"
+            ;;
+            3)
+                ns="000000$ns"
+            ;;
+            4)
+                ns="00000$ns"
+            ;;
+            5)
+                ns="0000$ns"
+            ;;
+            6)
+                ns="000$ns"
+            ;;
+            7)
+                ns="00$ns"
+            ;;
+            8)
+                ns="0$ns"
+            ;;
+            *)
+            ;;
+        esac
+        __time_trim_end_0 $ns
+        result=$s.$result
     fi
 }
 # (from: unix): string
 # returns the time elapsed since 'from'
 time_since(){
     time_unix
-    time_used "$result" $1
+    time_used $1 "$result"
 }

@@ -3,6 +3,126 @@ set -e
 
 Command=`basename $BASH_SOURCE`
 
+### time begin
+
+# (): (unix: string, errno)
+# returns the number of seconds elapsed since January 1, 1970 UTC.
+time_unix(){
+    local s=`date +%s.%N`
+    if [[ $s == '' ]];then
+        result_errno='command 'date' not found'
+        return 1
+    elif [[ ! $s =~ ^[0-9]+.[0-9]{9}$ ]];then
+        result_errno="command 'date' returned unknown data: $s"
+        return 1
+    fi
+    result=$s
+}
+__time_trim_start_0(){
+    local i=0
+    local n=${#1}
+    for ((;i<n;i++));do
+        if [[ ${1:i:1} != 0 ]];then
+          local s=${1:i}
+          if [[ $s == '' ]];then
+            break
+          fi
+          result=$s
+          return
+        fi
+    done
+    result=0
+}
+__time_trim_end_0(){
+    local i=${#1}
+    for ((i=i-1;i>=0;i--));do
+        if [[ ${1:i:1} != 0 ]];then
+          local s=${1:0:i+1}
+          if [[ $s == '' ]];then
+            break
+          fi
+          result=$s
+          return
+        fi
+    done
+    result=0
+}
+
+# (from: unix, to: unix): string
+# returns the elapsed time from 'from' to 'to'
+time_used(){
+    if [[ ! $1 != ^[0-9]+.[0-9]{9}$ ]];then
+        result_errno="parameter 'from' not a valid unix string: $1"
+        return 1
+    elif [[ ! $2 != ^[0-9]+.[0-9]{9}$ ]];then
+        result_errno="parameter 'from' not a valid unix string: $2"
+        return 1
+    fi
+    local s0=${1%%.*}
+    if [[ $s0 != 0 ]] && [[ $s0 == ^0[0-9]+$ ]];then
+        result_errno="parameter 'from' not a valid unix string: $1"
+        return 1
+    fi
+    local s1=${2%%.*}
+    if [[ $1 != 0 ]] && [[ $s1 == ^0[0-9]+$ ]];then
+        result_errno="parameter 'from' not a valid unix string: $2"
+        return 1
+    fi
+    __time_trim_start_0 ${1##*.}
+    local ns0=$result
+    __time_trim_start_0 ${2##*.}
+    local ns1=$result
+
+    if ((ns1>=ns0));then
+        local s=$((s1-s0))
+        local ns=$((ns1-ns0))
+    else
+        local s=$((s1-s0-1))
+        local ns=$((ns1+1000000000-ns0))
+    fi
+    if [[ $ns == 0 ]];then
+        result=$s
+    else
+        case ${#ns} in
+            1)
+                ns="00000000$ns"
+            ;;
+            2)
+                ns="0000000$ns"
+            ;;
+            3)
+                ns="000000$ns"
+            ;;
+            4)
+                ns="00000$ns"
+            ;;
+            5)
+                ns="0000$ns"
+            ;;
+            6)
+                ns="000$ns"
+            ;;
+            7)
+                ns="00$ns"
+            ;;
+            8)
+                ns="0$ns"
+            ;;
+            *)
+            ;;
+        esac
+        __time_trim_end_0 $ns
+        result=$s.$result
+    fi
+}
+# (from: unix): string
+# returns the time elapsed since 'from'
+time_since(){
+    time_unix
+    time_used $1 "$result" 
+}
+### time end
+
 # * $1 flag
 # * $2 message
 function print_flag
@@ -65,78 +185,19 @@ while true; do
         ;;
     esac 
 done
-function date_now
-{
-    echo `date +%s`.`date +%N`
-}
-function trim_start_0
-{
-    local i=0
-    local n=${#1}
-    for ((;i<n;i++));do
-        if [[ ${1:i:1} != 0 ]];then
-          local s=${1:i}
-          if [[ $s == '' ]];then
-            echo 0
-            return
-          fi
-          echo $s
-          return
-        fi
-    done
-    echo 0
-}
-function trim_end_0
-{
-    local i=${#1}
-    for ((i=i-1;i>=0;i--));do
-        if [[ ${1:i:1} != 0 ]];then
-          local s=${1:0:i}
-          if [[ $s == '' ]];then
-            echo 0
-            return
-          fi
-          echo $s
-          return
-        fi
-    done
-    echo 0
-}
-function date_used
-{
-    local s=$1
-    local s0=${s%%.*}
-    local ns0=${s##*.}
-    ns0=`trim_start_0 $ns0`
-    s=`date_now`
-    local s1=${s%%.*}
-    local ns1=${s##*.}
-    ns1=`trim_start_0 $ns1`
-    if ((ns1>ns0));then
-        s=$((s1-s0))
-        local ns=$((ns1-ns0))
-    else
-        s=$((s1- s0-1))
-        local ns=$((ns1+1000000000-ns0))
-    fi
-    ns=`printf '%09d' $ns`
-    ns=`trim_end_0 $ns`
-    if [[ $ns == 0 ]];then
-        echo $s
-    else
-        echo $s.$ns
-    fi
-}
+
 # alreay test count
 _TestCount=0
 # alreay test files
 _TestFiles=0
-start=`date_now`
+time_unix
+start=$result
 function test_method
 {
     _TestCount=$((_TestCount+1))
     if [[ $TestSilent == 0 ]];then
-        local start=`date_now`
+        time_unix
+        local start=$result
     fi
     if [[ $Test == 0 ]];then
         bash -c "#/bin/bash
@@ -147,7 +208,8 @@ $2
 "
     fi
     if [[ $TestSilent == 0 ]];then
-        echo " - $2 `date_used $start`s"
+        time_since $start
+        echo " - $2 ${result}s"
     fi
 }
 function test_file
@@ -161,7 +223,8 @@ function test_file
     local count=0
     if [[ $TestSilent == 0 ]];then
         echo "$1"
-        local start=`date_now`
+        time_unix
+        local start=$result
     fi
 
     # find test functions
@@ -186,7 +249,8 @@ function test_file
     done < "$1"
 
     if [[ $TestSilent == 0 ]];then
-        echo " * $count passed, used `date_used $start`s"
+        time_since $start
+        echo " * $count passed, used ${result}s"
     fi
 }
 
@@ -205,4 +269,5 @@ if [[ $tested == 0 ]];then
         exit 1
     fi
 fi
-echo "test $_TestFiles files, $_TestCount passed, used `date_used $start`s"
+time_since $start
+echo "test $_TestFiles files, $_TestCount passed, used ${result}s"
