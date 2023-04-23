@@ -202,9 +202,9 @@ time_used(){
     ns=`__time_trim_end_0 $ns`
 
     if [[ $ns == 0 ]];then
-        echo $s
+        result=$s
     else
-        echo $s.$ns
+        result=$s.$ns
     fi
 }
 # (from: unix): string
