@@ -105,9 +105,9 @@ function ${Prefix}write_file
 {
     local filename
     # not init,do it
-    if [[ \$__${Prefix}count == '' ]];then
+    if [[ \"\$__${Prefix}count\" == '' ]];then
         # set log filename
-        if [[ \$${Prefix}file_name == '' ]];then
+        if [[ \"\$${Prefix}file_name\" == '' ]];then
             filename=\$${Prefix}to_file
         else
             filename=\$${Prefix}file_name
@@ -115,20 +115,20 @@ function ${Prefix}write_file
 
         # dir and name
         local n=\${#filename}
-        if [[ \$n == 0 ]];then
+        if [[ \"\$n\" == 0 ]];then
             local dir='./'
             local name=''
-        elif [[ \${filename:n-1} == '/' ]];then
+        elif [[ \"\${filename:n-1}\" == '/' ]];then
             local dir=\"\$filename\"
             local name=''
         else
             local dir=\`dirname \"\$filename\"\`
             n=\${#dir}
-            if [[ \${dir:n-1} != '/' ]];then
+            if [[ \"\${dir:n-1}\" != '/' ]];then
                 dir=\"\$dir/\"
             fi
             local name=\`basename \"\$filename\"\`
-            if [[ \$name == '.' ]];then
+            if [[ \"\$name\" == '.' ]];then
                 name=''
             fi
         fi
@@ -136,7 +136,7 @@ function ${Prefix}write_file
         # name and ext
         __${Prefix}index=0
         local ext=''
-        if [[ \$name == '' ]];then
+        if [[ \"\$name\" == '' ]];then
             __${Prefix}name=\$dir
             __${Prefix}ext=''
         else
@@ -146,7 +146,7 @@ function ${Prefix}write_file
             local c
             for ((i=i-1;i>=0;i--));do
                 c=\${name:i:1}
-                if [[ \$c == \".\" ]];then
+                if [[ \"\$c\" == \".\" ]];then
                     __${Prefix}name=\"\$dir\${name:0:i}\"
                     __${Prefix}ext=\"\${name:i}\"
                     ext=\"\${name:i}\"

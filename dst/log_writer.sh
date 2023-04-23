@@ -22,9 +22,9 @@ function log_write_file
 {
     local filename
     # not init,do it
-    if [[ $__log_count == '' ]];then
+    if [[ "$__log_count" == '' ]];then
         # set log filename
-        if [[ $log_file_name == '' ]];then
+        if [[ "$log_file_name" == '' ]];then
             filename=$log_to_file
         else
             filename=$log_file_name
@@ -32,20 +32,20 @@ function log_write_file
 
         # dir and name
         local n=${#filename}
-        if [[ $n == 0 ]];then
+        if [[ "$n" == 0 ]];then
             local dir='./'
             local name=''
-        elif [[ ${filename:n-1} == '/' ]];then
+        elif [[ "${filename:n-1}" == '/' ]];then
             local dir="$filename"
             local name=''
         else
             local dir=`dirname "$filename"`
             n=${#dir}
-            if [[ ${dir:n-1} != '/' ]];then
+            if [[ "${dir:n-1}" != '/' ]];then
                 dir="$dir/"
             fi
             local name=`basename "$filename"`
-            if [[ $name == '.' ]];then
+            if [[ "$name" == '.' ]];then
                 name=''
             fi
         fi
@@ -53,7 +53,7 @@ function log_write_file
         # name and ext
         __log_index=0
         local ext=''
-        if [[ $name == '' ]];then
+        if [[ "$name" == '' ]];then
             __log_name=$dir
             __log_ext=''
         else
@@ -63,7 +63,7 @@ function log_write_file
             local c
             for ((i=i-1;i>=0;i--));do
                 c=${name:i:1}
-                if [[ $c == "." ]];then
+                if [[ "$c" == "." ]];then
                     __log_name="$dir${name:0:i}"
                     __log_ext="${name:i}"
                     ext="${name:i}"
