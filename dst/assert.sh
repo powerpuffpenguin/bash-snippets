@@ -10,7 +10,7 @@ function __assert_join_args
     local n=${#@}
     local i=0
     for ((;i<n;i++));do
-        if [[ $i == 0 ]];then
+        if [[ "$i" == 0 ]];then
             s="$1"
         else
             s="$s, $1"
@@ -41,7 +41,7 @@ function __assert_error
 
     shift 3
     local msg="$@"
-    if [[ $msg != '' ]];then
+    if [[ "$msg" != '' ]];then
         __assert_print "Message:" "$msg"
     fi
 
@@ -53,12 +53,12 @@ function __assert_error
 # assert $expect == $actual
 function assert_equal
 {
-    if [[ $1 == $2 ]];then
+    if [[ "$1" == "$2" ]];then
         return 0
     fi
 
-    local expect="$1"
-    local actual="$2"
+    local expect=$1
+    local actual=$2
     shift 2
     __assert_error "Not equal:" "$expect" "$actual" "$@"
 }
@@ -67,11 +67,11 @@ function assert_equal
 # assert actual == '' or 'false' or 'FALSE' or 0
 function assert_false
 {
-    if [[ $1 == '' ]] || [[ $1 == false ]] || [[ $1 == FALSE ]] || [[ $1 == 0 ]];then
+    if [[ "$1" == '' ]] || [[ "$1" == false ]] || [[ "$1" == FALSE ]] || [[ "$1" == 0 ]];then
         return 0
     fi
 
-    local actual="$1"
+    local actual=$1
     shift 1
     __assert_error "Should be false" "'' or false or FALSE or 0" "$actual" "$@"
 }
@@ -80,8 +80,8 @@ function assert_false
 # assert actual != ('' or 'false' or 'FALSE' or 0)
 function assert_true
 {
-    if [[ $1 == '' ]] || [[ $1 == false ]] || [[ $1 == FALSE ]] || [[ $1 == 0 ]];then
-        local actual="$1"
+    if [[ "$1" == '' ]] || [[ "$1" == false ]] || [[ "$1" == FALSE ]] || [[ "$1" == 0 ]];then
+        local actual=$1
         shift 1
         __assert_error "Should be true" "!= ('' or false or FALSE or 0)" "$actual" "$@"
     fi
@@ -98,13 +98,13 @@ function assert_call_equal
     local msg="$f($s)"
 
     if ! "$f" "$@";then
-        if [[ $result_errno != '' ]];then
+        if [[ "$result_errno" != '' ]];then
             msg="$msg => $result_errno"
         fi
         __assert_error "Function '$f' should be return true" true false "$msg"
         return $?
     fi
-    if [[ $expect != $result ]];then
+    if [[ "$expect" != "$result" ]];then
         __assert_error "Function '$f' return not equal:" "$expect" "$result" "$msg"
     fi
 }
@@ -119,7 +119,7 @@ function assert_call_true
     local msg="$f($s)"
 
     if ! "$f" "$@";then
-        if [[ $result_errno != '' ]];then
+        if [[ "$result_errno" != '' ]];then
             msg="$msg => $result_errno"
         fi
         __assert_error "Function '$f' should be return true" true false "$msg"

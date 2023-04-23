@@ -21,12 +21,12 @@ core_panic(){
 }
 
 __core_check_function(){
-    if [[ ! $1 =~ ^[0-9_a-zA-Z\.,]+$ ]];then
+    if [[ ! "$1" =~ ^[0-9_a-zA-Z\.,]+$ ]];then
         core_panic "function name invalid: $1"
     fi
 }
 __core_check_var(){
-    if [[ ! $1 =~ ^[0-9_a-zA-Z]+$ ]];then
+    if [[ ! "$1" =~ ^[0-9_a-zA-Z]+$ ]];then
         core_panic "var name invalid: $1"
     fi
 }
@@ -48,11 +48,11 @@ __core_getopt() {
     local s
     local c
     while ((n>0)); do
-        if [[ $name != '' ]];then
+        if [[ "$name" != '' ]];then
             args+=("$@")
             break
         fi
-        if [[ $1 != -* ]] || [[ $1 == - ]];then
+        if [[ "$1" != -* ]] || [[ "$1" == - ]];then
             core_panic "core_call not define flags: $1"
         fi
         s=${1:1}
@@ -70,7 +70,7 @@ __core_getopt() {
                     is_caller=1
                 ;;
                 f)
-                    if [[ $s == '' ]];then
+                    if [[ "$s" == '' ]];then
                         __core_check_function "$2"
                         name=$2
                         shift
@@ -80,7 +80,7 @@ __core_getopt() {
                     fi
                 ;;
                 v)
-                    if [[ $s == '' ]];then
+                    if [[ "$s" == '' ]];then
                         __core_check_var "$2"
                         var_result=$2
                         shift
@@ -90,7 +90,7 @@ __core_getopt() {
                     fi
                 ;;
                 e)
-                    if [[ $s == '' ]];then
+                    if [[ "$s" == '' ]];then
                         __core_check_var "$2"
                         var_errno=$2
                         shift
@@ -108,7 +108,7 @@ __core_getopt() {
         n=${#@}
     done
 
-    if [[ $name == '' ]];then
+    if [[ "$name" == '' ]];then
         core_panic "unknow name, use core_call -f xxx args..."
     fi
 }
@@ -133,28 +133,28 @@ core_call(){
         echo '__core_getopt unknow error '
         exit 1
     fi
-    if [[ $var_result != '' ]];then
+    if [[ "$var_result" != '' ]];then
         local result
     else
         result=''
     fi
-    if [[ $var_errno != '' ]];then
+    if [[ "$var_errno" != '' ]];then
         local result_errno
     else
         result_errno=''
     fi
     local errno=0
     if "$name" "${args[@]}";then
-        if [[ $var_result != '' ]];then
+        if [[ "$var_result" != '' ]];then
             eval "$var_result=\$result"
         fi
     else
         errno=$?
-        if [[ $var_errno != '' ]];then
+        if [[ "$var_errno" != '' ]];then
             eval "$var_errno=\$result_errno"
         fi
         if [[ $is_trace != 0 ]];then
-            if [[ $result_errno == '' ]];then
+            if [[ "$result_errno" == '' ]];then
                 echo "Error: $errno"
             else
                 echo "Error: $errno, $result_errno"

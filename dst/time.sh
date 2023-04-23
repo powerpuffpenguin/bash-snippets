@@ -13,7 +13,7 @@ function __time_string
     if ((v>=compare));then
         local div=$((v/compare))
         v=$((v%compare))
-        if [[ $result == '' ]];then
+        if [[ "$result" == '' ]];then
             result="$div$tag"
         else
             result="$result$div$tag"
@@ -29,7 +29,7 @@ time_day=86400
 time_string(){
     result=''
 
-    if [[ ! $1 =~ ^[0-9]+$ ]]; then
+    if [[ ! "$1" =~ ^[0-9]+$ ]]; then
         result_errno="not a duration: $1"
         return 1
     fi
@@ -48,7 +48,7 @@ time_string(){
     __time_string
 
     if ((v>0));then
-        if [[ $result == '' ]];then
+        if [[ "$result" == '' ]];then
             result="${v}s"
         else
             result="$result${v}s"
@@ -56,7 +56,7 @@ time_string(){
         return
     fi
     
-    if [[ $result == '' ]];then
+    if [[ "$result" == '' ]];then
         result=0s
     fi
 }
@@ -77,7 +77,7 @@ time_parse(){
                 v="$v$c"
             ;;
             d)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a duration string: $1"
                     return 1
                 fi
@@ -85,7 +85,7 @@ time_parse(){
                 v=''
             ;;
             h)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a duration string: $1"
                     return 1
                 fi
@@ -93,7 +93,7 @@ time_parse(){
                 v=''
             ;;
             m)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a duration string: $1"
                     return 1
                 fi
@@ -101,7 +101,7 @@ time_parse(){
                 v=''
             ;;
             s)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a duration string: $1"
                     return 1
                 fi
@@ -114,7 +114,7 @@ time_parse(){
             ;;
         esac
     done
-    if [[ $v == '' ]];then
+    if [[ "$v" == '' ]];then
         result=$sum
     else
         result_errno="not a duration string: $1"
@@ -122,14 +122,14 @@ time_parse(){
     fi
 }
 
-# (): (unix: string, errno)
-# returns the number of seconds elapsed since January 1, 1970 UTC.
+# () (unix: string, errno)
+# returns the number of seconds elapsed since January 1, 1970 UTC
 time_unix(){
     local s=`date +%s.%N`
-    if [[ $s == '' ]];then
+    if [[ "$s" == '' ]];then
         result_errno='command 'date' not found'
         return 1
-    elif [[ ! $s =~ ^[0-9]+.[0-9]{9}$ ]];then
+    elif [[ ! "$s" =~ ^[0-9]+.[0-9]{9}$ ]];then
         result_errno="command 'date' returned unknown data: $s"
         return 1
     fi
@@ -139,9 +139,9 @@ __time_trim_start_0(){
     local i=0
     local n=${#1}
     for ((;i<n;i++));do
-        if [[ ${1:i:1} != 0 ]];then
+        if [[ "${1:i:1}" != 0 ]];then
           local s=${1:i}
-          if [[ $s == '' ]];then
+          if [[ "$s" == '' ]];then
             break
           fi
           result=$s
@@ -153,9 +153,9 @@ __time_trim_start_0(){
 __time_trim_end_0(){
     local i=${#1}
     for ((i=i-1;i>=0;i--));do
-        if [[ ${1:i:1} != 0 ]];then
+        if [[ "${1:i:1}" != 0 ]];then
           local s=${1:0:i+1}
-          if [[ $s == '' ]];then
+          if [[ "$s" == '' ]];then
             break
           fi
           result=$s
@@ -165,23 +165,23 @@ __time_trim_end_0(){
     result=0
 }
 
-# (from: unix, to: unix): string
+# (from: unix, to: unix) (s: string, errno)
 # returns the elapsed time from 'from' to 'to'
 time_used(){
-    if [[ ! $1 != ^[0-9]+.[0-9]{9}$ ]];then
+    if [[ ! "$1" != ^[0-9]+.[0-9]{9}$ ]];then
         result_errno="parameter 'from' not a valid unix string: $1"
         return 1
-    elif [[ ! $2 != ^[0-9]+.[0-9]{9}$ ]];then
+    elif [[ ! "$2" != ^[0-9]+.[0-9]{9}$ ]];then
         result_errno="parameter 'from' not a valid unix string: $2"
         return 1
     fi
     local s0=${1%%.*}
-    if [[ $s0 != 0 ]] && [[ $s0 == ^0[0-9]+$ ]];then
+    if [[ "$s0" != 0 ]] && [[ "$s0" == ^0[0-9]+$ ]];then
         result_errno="parameter 'from' not a valid unix string: $1"
         return 1
     fi
     local s1=${2%%.*}
-    if [[ $1 != 0 ]] && [[ $s1 == ^0[0-9]+$ ]];then
+    if [[ "$1" != 0 ]] && [[ "$s1" == ^0[0-9]+$ ]];then
         result_errno="parameter 'from' not a valid unix string: $2"
         return 1
     fi
@@ -232,7 +232,7 @@ time_used(){
         result=$s.$result
     fi
 }
-# (from: unix): string
+# (from: unix) (s: string, errno)
 # returns the time elapsed since 'from'
 time_since(){
     time_unix

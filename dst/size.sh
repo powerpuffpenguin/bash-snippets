@@ -18,7 +18,7 @@ function __size_string
     if ((v>=compare));then
         local div=$((v/compare))
         v=$((v%compare))
-        if [[ $result == '' ]];then
+        if [[ "$result" == '' ]];then
             result="$div$tag"
         else
             result="$result$div$tag"
@@ -30,7 +30,7 @@ function __size_string
 function size_string
 {
     result=''
-    if [[ ! $1 =~ ^[0-9]+$ ]]; then
+    if [[ ! "$1" =~ ^[0-9]+$ ]]; then
         result_errno="not a size: $1"
         return 1
     fi
@@ -54,7 +54,7 @@ function size_string
     __size_string
 
     if ((v>0));then
-        if [[ $result == '' ]];then
+        if [[ "$result" == '' ]];then
             result="${v}b"
         else
             result="$result${v}b"
@@ -62,7 +62,7 @@ function size_string
         return
     fi
     
-    if [[ $result == '' ]];then
+    if [[ "$result" == '' ]];then
         result=0b
     fi
 }
@@ -84,7 +84,7 @@ function size_parse
                 v="$v$c"
             ;;
             t)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a size string: $1"
                     return 1
                 fi
@@ -92,7 +92,7 @@ function size_parse
                 v=''
             ;;
             g)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a size string: $1"
                     return 1
                 fi
@@ -100,7 +100,7 @@ function size_parse
                 v=''
             ;;
             m)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a size string: $1"
                     return 1
                 fi
@@ -108,7 +108,7 @@ function size_parse
                 v=''
             ;;
             k)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a size string: $1"
                     return 1
                 fi
@@ -116,7 +116,7 @@ function size_parse
                 v=''
             ;;
             b)
-                if [[ $v == '' ]];then
+                if [[ "$v" == '' ]];then
                     result_errno="not a size string: $1"
                     return 1
                 fi
@@ -129,7 +129,7 @@ function size_parse
             ;;
         esac
     done
-    if [[ $v == '' ]];then
+    if [[ "$v" == '' ]];then
         result=$sum
     else
         result_errno="not a size string: $1"

@@ -51,3 +51,43 @@ time_hour=3600
 ```
 time_day=86400
 ```
+
+# time_string
+
+```
+function(duration: number) (s: string, errno)
+```
+
+將秒數轉爲人類友好的字符串
+
+# time_parse
+
+```
+function (s: string) (duration: number, errno)
+```
+
+將人類友好的字符串轉爲秒數
+
+# time_unix
+
+```
+function time_unix() (unix: string, errno)
+```
+
+返回自 1970年1月1日至今經歷過的秒數
+
+# time_used
+
+```
+function time_used(from: unix, to: unix) (s: string, errno)
+```
+
+返回從 from 到 to 經過秒數的人類友好字符串
+
+# time_since
+
+```
+function time_since(from: unix) (s: string, errno)
+```
+
+返回從 from 到當前時間 經過秒數的人類友好字符串

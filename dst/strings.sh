@@ -32,7 +32,7 @@ function strings_start_with
 function strings_index_ofchar
 {
     result=-1
-    if [[ $1 == '' ]] || [[ $2 == '' ]];then
+    if [[ "$1" == '' ]] || [[ "$2" == '' ]];then
         return
     fi
     local s=$1
@@ -45,15 +45,15 @@ function strings_index_ofchar
     local c1
     for ((i=0;i<ns;i++));do
         c0=${s:i:1}
-        if [[ $nchars == 1 ]];then
-            if [[ $c0 == $chars ]];then
+        if [[ "$nchars" == 1 ]];then
+            if [[ "$c0" == "$chars" ]];then
                 result=$i
                 return
             fi
         else
             for ((j=0;j<nchars;j++));do
                 c1=${chars:j:1}
-                if [[ $c0 == $c1 ]];then
+                if [[ "$c0" == "$c1" ]];then
                     result=$i
                     return
                 fi
@@ -67,7 +67,7 @@ function strings_index_ofchar
 function strings_last_ofchar
 {
     result=-1
-    if [[ $1 == '' ]] || [[ $2 == '' ]];then
+    if [[ "$1" == '' ]] || [[ "$2" == '' ]];then
         return
     fi
     local s=$1
@@ -80,15 +80,15 @@ function strings_last_ofchar
     local c1
     for ((i=ns-1;i>=0;i--));do
         c0=${s:i:1}
-        if [[ $nchars == 1 ]];then
-            if [[ $c0 == $chars ]];then
+        if [[ "$nchars" == 1 ]];then
+            if [[ "$c0" == $chars ]];then
                 result=$i
                 return
             fi
         else
             for ((j=0;j<nchars;j++));do
                 c1=${chars:j:1}
-                if [[ $c0 == $c1 ]];then
+                if [[ "$c0" == $c1 ]];then
                     result=$i
                     return
                 fi
@@ -103,7 +103,7 @@ function strings_last_ofchar
 function strings_split
 {
     local ifs=$IFS
-    IFS="$2"
+    IFS=$2
     result=($1)
     IFS=$ifs
 }

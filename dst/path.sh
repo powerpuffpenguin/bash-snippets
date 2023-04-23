@@ -16,9 +16,9 @@ function path_split_name
     local c
     for ((i=i-1;i>=0;i--));do
         c=${1:i:1}
-        if [[ $c == / ]];then
+        if [[ "$c" == / ]];then
             break
-        elif [[ $c == . ]];then
+        elif [[ "$c" == . ]];then
             result=(
                 "${1:0:i}"
                 "${1:i}"
@@ -64,7 +64,7 @@ function path_ext
 # https://9p.io/sys/doc/lexnames.html
 function path_clean
 {
-    if [[ $1 == '' ]];then
+    if [[ "$1" == '' ]];then
         result=.
 		return
 	fi
@@ -88,20 +88,20 @@ function path_clean
     local w
     while ((r<n));do
         c0=${1:r:1}
-        if [[ $c0 == / ]];then
+        if [[ "$c0" == / ]];then
             # empty path element
             r=$((r+1))
             continue
         fi
-        if [[ $c0 == . ]];then
+        if [[ "$c0" == . ]];then
             r1=$((r+1))
-            if [[ $r1 == $n ]] || [[ "${1:r1:1}" == / ]];then
+            if [[ "$r1" == "$n" ]] || [[ "${1:r1:1}" == / ]];then
                 # . element
                 r=$((r+1))
                 continue
             elif [[ "${1:r1:1}" == . ]];then
                 r2=$((r+2))
-                if [[ $r2 == $n ]] || [[ "${1:r2:1}" == / ]];then
+                if [[ "$r2" == "$n" ]] || [[ "${1:r2:1}" == / ]];then
                     #  .. element: remove to last /
                     r=$r2
                     w=${#result}
@@ -111,8 +111,8 @@ function path_clean
                           w=$((w-1))
                         done
                         result=${result:0:w}
-                    elif [[ $rooted == 0 ]];then
-                        if [[ $result == '' ]];then
+                    elif [[ "$rooted" == 0 ]];then
+                        if [[ "$result" == '' ]];then
                             result=..
                         else
                             result="$result/.."
@@ -127,16 +127,16 @@ function path_clean
         # real path element.
         # add slash if needed
         w=${#result}
-        if [[ $rooted == 1 ]];then
-            if [[ $w != 1 ]];then
+        if [[ "$rooted" == 1 ]];then
+            if [[ "$w" != 1 ]];then
                 result="$result/"
             fi
-        elif [[ $w != 0 ]];then
+        elif [[ "$w" != 0 ]];then
             result="$result/"
         fi
         while ((r<n)); do
             c0=${1:r:1}
-            if [[ $c0 == / ]];then
+            if [[ "$c0" == / ]];then
                 break
             fi
             result="$result$c0"
@@ -145,7 +145,7 @@ function path_clean
 	done
 
 	# Turn empty string into "."
-	if [[ $result == '' ]];then
+	if [[ "$result" == '' ]];then
 		result=.
 	fi
 }
@@ -161,7 +161,7 @@ function path_split
     local c
     for ((i=i-1;i>=0;i--));do
         c=${1:i:1}
-        if [[ $c == / ]];then
+        if [[ "$c" == / ]];then
             result=(
                 "${1:0:i+1}"
                 "${1:i+1}"
@@ -184,7 +184,7 @@ function path_dir
 # If the path consists entirely of slashes, path_base returns "/".
 function path_base
 {
-    if [[ $1 == '' ]];then
+    if [[ "$1" == '' ]];then
         result=.
         return
     fi
@@ -201,7 +201,7 @@ function path_base
     # Find the last element
     path_split "$result"
     result=${result[1]}
-    if [[ $result == '' ]];then
+    if [[ "$result" == '' ]];then
         result=/
     fi
 }
@@ -222,12 +222,12 @@ function path_join
     for s in "$@";do
         size=$((size+${#s}))
     done
-    if [[ $size == 0 ]];then
+    if [[ "$size" == 0 ]];then
         return
     fi
 
     for s in "$@";do
-        if [[ $result == '' ]];then
+        if [[ "$result" == '' ]];then
             result=$s
         else
             result="$result/$s"
