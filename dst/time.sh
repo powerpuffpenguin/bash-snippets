@@ -155,7 +155,7 @@ __time_trim_end_0(){
     local i=${#1}
     for ((i=i-1;i>=0;i--));do
         if [[ ${1:i:1} != 0 ]];then
-          local s=${1:0:i}
+          local s=${1:0:i+1}
           if [[ $s == '' ]];then
             echo 0
             return
@@ -177,33 +177,33 @@ time_used(){
         result_errno="parameter 'from' not a valid unix string: $2"
         return 1
     fi
-    local s0=${s%%.*}
+    local s0=${1%%.*}
     if [[ $s0 != 0 ]] && [[ $s0 == ^0[0-9]+$ ]];then
         result_errno="parameter 'from' not a valid unix string: $1"
         return 1
     fi
-    local s1=${s%%.*}
+    local s1=${2%%.*}
     if [[ $1 != 0 ]] && [[ $s1 == ^0[0-9]+$ ]];then
         result_errno="parameter 'from' not a valid unix string: $2"
         return 1
     fi
-    local ns0=${s##*.}
+    local ns0=${1##*.}
     ns0=`__time_trim_start_0 $ns0`
-    local ns1=${s##*.}
+    local ns1=${2##*.}
     ns1=`__time_trim_start_0 $ns1`
 
-    if ((ns1>ns0));then
+    if ((ns1>=ns0));then
         local s=$((s1-s0))
         local ns=$((ns1-ns0))
     else
         local s=$((s1-s0-1))
         local ns=$((ns1+1000000000-ns0))
     fi
-    ns=`__time_trim_end_0 $ns`
-
     if [[ $ns == 0 ]];then
         result=$s
     else
+        ns=`printf '%09d' $ns`
+        ns=`__time_trim_end_0 $ns`
         result=$s.$ns
     fi
 }

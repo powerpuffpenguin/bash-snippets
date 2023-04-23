@@ -47,3 +47,11 @@ test_duration(){
     done
 }
 
+test_used(){
+    assert_call_equal 0.000000001 time_used 0.123456788 0.123456789
+    assert_call_equal 1.012 time_used 0.123456789 1.135456789
+    assert_call_equal 123 time_used 2.999999999 125.999999999
+    assert_call_equal 4 time_used 1.000000000 5.000000000
+    assert_call_equal 3.999999999 time_used 1.000000001 5.000000000
+    assert_call_equal 3.8 time_used 1.200000000 5.000000000
+}
