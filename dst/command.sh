@@ -11,21 +11,53 @@ __command_long=''
 __command_children=()
 __command_flag=0
 __command_flags=()
-
-# (name: string, short_describe?: string, long_describe?: string) (id: number, errno)
+# (...) (id: number, errno)
 # begin a new command
+# -n, --name string   Name of command
+# -l, --long string   Long describe of command
+# -s, --short string   Short describe of command
+# -f, --func string   Function name of command
 command_begin(){
-    if [[ "$1" == '' ]];then
-        result_errno="command name invalid: $1"
+    local name
+    local long
+    local short
+    local func
+    # parse
+    local n=${#@}
+
+    local shift_val
+    local shift_n
+    while ((n>0)); do
+        if __command_flags name n "$1" "$2";then
+            name=$shift_val
+            shift $shift_n
+        elif __command_flags long l "$1" "$2";then
+            long=$shift_val
+            shift $shift_n
+        elif __command_flags short s "$1" "$2";then
+            short=$shift_val
+            shift $shift_n
+        elif __command_flags func f "$1" "$2";then
+            func=$shift_val
+            shift $shift_n        
+        else
+            result_errno="[command_begin] unknow flags: $1"
+            return 1
+        fi
+        n=${#@}
+    done
+
+    if [[ "$name" == '' ]];then
+        result_errno="command name invalid: $name"
         return 1
     fi
 
-    __command_name=$1
-    __command_short=$2
-    if [[ "$long_describe" == '' ]];then
-        __command_long=$2
+    __command_name=$name
+    __command_short=$short
+    if [[ "$long" == '' ]];then
+        __command_long=$short
     else
-        __command_long=$3
+        __command_long=$long
     fi
     __command_children=()
     __command_flags=()

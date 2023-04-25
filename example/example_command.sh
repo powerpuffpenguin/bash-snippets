@@ -7,7 +7,9 @@ source ../dst/command.sh
 source ../dst/core.sh
 
 main(){
-    core_call_default command_begin "`basename $BASH_SOURCE`" "Example for command.sh"
+    core_call_default command_begin --name "`basename $BASH_SOURCE`" \
+        --short 'Example for command.sh'
+
     core_call_default command_flags --type string '--describe=Listen address' \
         -v listen --long=listen -sl \
         --default=::
