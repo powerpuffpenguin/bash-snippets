@@ -33,6 +33,73 @@ command_begin(){
     result=$__command_id
     __command_id=$((__command_id+1))
 }
+__command_join(){
+    result=''
+    local s
+    for s in "${@}";do
+        s=${s// /\\ }
+        if [[ "$result" == '' ]];then
+            result=$s
+        else
+            result="$result $s"
+        fi
+    done
+}
+# get flag describe
+# out s
+# in type
+# in describe
+# in max
+# in min
+# in value
+# in pattern
+# in regexp
+# in default
+__command_flags_describe(){
+    local n
+    local result
+    s=$describe
+    if [[ "$type" == *s ]];then
+        n=${#default[@]}
+        if ((n>0));then
+            __command_join "${default[@]}"
+            s="$s (default [$result])"
+        fi
+    elif [[ "$default" != '' ]];then
+        s="$s (default $default)"
+    fi
+    case "$type" in
+        int|uint|ints|uints)
+            if [[ "$max" != '' ]] || [[ "$min" != '' ]];then
+                if [[ "$min" == '' ]];then
+                    s="$s (range x to"
+                else
+                    s="$s (range $min to"
+                fi
+                if [[ "$max" == '' ]];then
+                    s="$s x)"
+                else
+                    s="$s $max)"
+                fi
+            fi
+        ;;
+    esac
+    n=${#value}
+    if ((n>0));then
+        __command_join "${value[@]}"
+        s="$s (option [$result])"
+    fi
+    n=${#pattern}
+    if ((n>0));then
+        __command_join "${pattern[@]}"
+        s="$s (== $result})"
+    fi
+    n=${#regexp}
+    if ((n>0));then
+        __command_join "${regexp[@]}"
+        s="$s (=~ $result})"
+    fi
+}
 
 # (long: string, short:string, arg0: string, args1: string) (shift_val: string, shift_n: string) 
 __command_flags(){
@@ -208,7 +275,6 @@ command_flags(){
             fi
         ;;
     esac
-
     local s="${prefix}_var=\$var
 ${prefix}_long=\$long
 ${prefix}_short=\$short
@@ -221,6 +287,7 @@ ${prefix}_pattern=(\"\${pattern[@]}\")
 ${prefix}_regexp=(\"\${regexp[@]}\")
 $s_default
 "
+    # echo "$s"
     if eval "$s";then
         __command_flags+=("$flag")
         __command_flag=$((__command_flag+1))
@@ -235,6 +302,7 @@ __command_help(){
     s="$s
 ${prefix}_help(){
     local min=0
+    local i
     local n
     local s
     local format
@@ -285,47 +353,78 @@ ${prefix}_help(){
     # flags
     local flags_long
     local flags_short
+    local flags_type
     local flag
     local i=0
     for flag in "${__command_flags[@]}";do
         if [[ $i == 0 ]];then
-            flags_long="(\"\$${prefix}_${flag}_long\""
-            flags_short="(\"\$${prefix}_${flag}_short\""
+            flags_long="(\"\$${prefix}_flag_${flag}_long\""
+            flags_short="(\"\$${prefix}_flag_${flag}_short\""
+            flags_type="(\"\$${prefix}_flag_${flag}_type\""
         else
-            flags_long="$flags_long \"\$${prefix}_${flag}_long\""
-            flags_short="$flags_short \"\$${prefix}_${flag}_short\""
+            flags_long="$flags_long \"\$${prefix}_flag_${flag}_long\""
+            flags_short="$flags_short \"\$${prefix}_flag_${flag}_short\""
+            flags_type="$flags_type \"\$${prefix}_flag_${flag}_type\""
         fi
         i=$((i+1))
     done
     if [[ "$flags_long" == '' ]];then
         flags_long="("
         flags_short="("
+        flags_type="("
     fi
     s="$s
     # flags
     printf '\nAvailable Commands:\n'
     local flags_long=$flags_long)
     local flags_short=$flags_short)
-    min=4
+    local flags_type=$flags_type)
+    min=9
+    i=0
     for s in \"\${flags_long[@]}\";do
+        s=\"\$s \${flags_type[i]}\"
         n=\${#s}
         if ((min<n));then
             min=\$n
         fi
+        i=\$((i+1))
     done
-    format=\"  %2s, --%\${min}s   %s\n\"
+    format=\"  %3s --%-\${min}s   %s\n\"
+    local short
+    local type
+    local describe
+    local max
+    local min
+    local value
+    local pattern
+    local regexp
+    local default
 "
     local sf
     for flag in "${__command_flags[@]}";do
-        sf="$sf    # local x=${prefix}_$flag
-    # call
+        sf="$sf    short=\$${prefix}_flag_${flag}_short
+    if [[ \"\$short\" != '' ]];then
+        short=\"-\$short,\"
+    fi
+    type=\$${prefix}_flag_${flag}_type
+    describe=\$${prefix}_flag_${flag}_describe
+    max=\$${prefix}_flag_${flag}_max
+    min=\$${prefix}_flag_${flag}_min
+    value=(\"\${${prefix}_flag_${flag}_value[@]}\")
+    pattern=(\"\${${prefix}_flag_${flag}_pattern[@]}\")
+    regexp=(\"\${${prefix}_flag_${flag}_regexp[@]}\")
+    if [[ \"\$type\" == *s ]];then
+        default=(\"\${${prefix}_flag_${flag}_default[@]}\")
+    else
+        default=\$${prefix}_flag_${flag}_default
+    fi
+    __command_flags_describe
+    printf \"\$format\" \"\$short\" \"\$${prefix}_flag_${flag}_long \$${prefix}_flag_${flag}_type\" \"\$s\"
 "
     done
-    s="$s$sf    printf \"\$format\" -h help \"help for \$${prefix}_name\"
+    s="$s$sf    printf \"\$format\" \"-h,\" \"help bool\" \"Help for \$${prefix}_name\"
 "
-
 echo "$s"
-
     # children help
     n=${#__command_children[@]}
     if ((n>0));then
