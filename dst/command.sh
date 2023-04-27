@@ -928,8 +928,8 @@ ${prefix}_execute(){
            return 1
 "
     s="$s        else
-            _args+=(\"\$1\") 
-            shift=1
+            _args+=(\"\$1\")
+            _shift=1
         fi
     done
 "
