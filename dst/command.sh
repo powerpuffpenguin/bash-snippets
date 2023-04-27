@@ -4,67 +4,16 @@ if [[ -v command_version ]] && [[ $command_version =~ ^[0-9]$ ]] && ((command_ve
 fi
 command_version=1
 
-__command_id=0
-__command_name=''
-__command_short=''
-__command_long=''
-__command_children=()
-__command_flag=0
-__command_flags=()
-# (...) (id: number, errno)
-# begin a new command
-# -n, --name string   Name of command
-# -l, --long string   Long describe of command
-# -s, --short string   Short describe of command
-# -f, --func string   Function name of command
-command_begin(){
-    local name
-    local long
-    local short
-    local func
-    # parse
-    local n=${#@}
-
-    local shift_val
-    local shift_n
-    while ((n>0)); do
-        if __command_flags name n "$1" "$2";then
-            name=$shift_val
-            shift $shift_n
-        elif __command_flags long l "$1" "$2";then
-            long=$shift_val
-            shift $shift_n
-        elif __command_flags short s "$1" "$2";then
-            short=$shift_val
-            shift $shift_n
-        elif __command_flags func f "$1" "$2";then
-            func=$shift_val
-            shift $shift_n        
-        else
-            result_errno="[command_begin] unknow flags: $1"
-            return 1
-        fi
-        n=${#@}
-    done
-
-    if [[ "$name" == '' ]];then
-        result_errno="command name invalid: $name"
-        return 1
-    fi
-
-    __command_name=$name
-    __command_short=$short
-    if [[ "$long" == '' ]];then
-        __command_long=$short
-    else
-        __command_long=$long
-    fi
+if [[ ! -v __command_id ]];then
+    __command_name=''
+    __command_short=''
+    __command_long=''
     __command_children=()
+    __command_flag=0
     __command_flags=()
+    __command_id=0
+fi
 
-    result=$__command_id
-    __command_id=$((__command_id+1))
-}
 __command_join(){
     result=''
     local s
@@ -246,29 +195,23 @@ command_flags(){
         fi
         n=${#@}
     done
-    if [[ ! "$var" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]];then
+    if [[ "$long" != help ]] && [[ ! "$var" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]];then
         result_errno='--var must matched with =~ ^[a-zA-Z_][a-zA-Z0-9_]*$'
         return 1
     fi
     if [[ "$long" == '' ]];then
         result_errno='long flag must be specified'
         return 1
-    elif [[ "$long" == help ]];then
-        result_errno='--help cannot be specified, it is a reserved flag'
-        return 1
     fi
     if [[ "$short" != '' ]];then
-        if [[ "$short" == h ]];then
-            result_errno='-h cannot be specified, it is a reserved flag'
-            return 1
-        elif [[ "$short" != ? ]];then
+      if [[ "$short" != ? ]];then
             result_errno='short flag must be a char'
             return 1
         fi
     fi
 
     local flag=$__command_flag
-    local id=$((__command_id-1))
+    local id=$__command_id
     local prefix="__command_${id}_flag_${flag}"
     local s_default
     case "$type" in
@@ -329,7 +272,65 @@ $s_default
         return $errno
     fi
 }
+# (...) (id: number, errno)
+# begin a new command
+# -n, --name string   Name of command
+# -l, --long string   Long describe of command
+# -s, --short string   Short describe of command
+# -f, --func string   Function name of command
+command_begin(){
+    if [[ $__command_name != '' ]];then
+        result_errno="there is an uncommitted command: $__command_name"
+        return 1
+    fi
+    local name
+    local long
+    local short
+    local func
+    # parse
+    local n=${#@}
 
+    local shift_val
+    local shift_n
+    while ((n>0)); do
+        if __command_flags name n "$1" "$2";then
+            name=$shift_val
+            shift $shift_n
+        elif __command_flags long l "$1" "$2";then
+            long=$shift_val
+            shift $shift_n
+        elif __command_flags short s "$1" "$2";then
+            short=$shift_val
+            shift $shift_n
+        elif __command_flags func f "$1" "$2";then
+            func=$shift_val
+            shift $shift_n        
+        else
+            result_errno="[command_begin] unknow flags: $1"
+            return 1
+        fi
+        n=${#@}
+    done
+
+    if [[ "$name" == '' ]];then
+        result_errno="command name invalid: $name"
+        return 1
+    fi
+
+    __command_name=$name
+    __command_short=$short
+    if [[ "$long" == '' ]];then
+        __command_long=$short
+    else
+        __command_long=$long
+    fi
+    __command_children=()
+    __command_flags=()
+
+    command_flags --type bool --describe "Help for $name"\
+        --long help --short h
+    result=$__command_id
+}
 __command_help(){
     s="$s
 ${prefix}_help(){
@@ -454,8 +455,7 @@ ${prefix}_help(){
     printf \"\$format\" \"\$short\" \"\$${prefix}_flag_${flag}_long \$${prefix}_flag_${flag}_type\" \"\$s\"
 "
     done
-    s="$s$sf    printf \"\$format\" \"-h,\" \"help bool\" \"Help for \$${prefix}_name\"
-"
+    s="$s$sf"
 echo "$s"
     # children help
     n=${#__command_children[@]}
@@ -475,7 +475,7 @@ command_string(){
         result_errno="please call command_begin to begin a new command"
         return 1
     fi
-    local id=$((__command_id-1))
+    local id=$__command_id
     local prefix="__command_${id}"
 
     local s="${prefix}_id=$id
@@ -529,7 +529,7 @@ command_commit(){
          local names="names=("
          local s
          for s in "${__command_flags[@]}";do
-            names="$names \"\${__command_$((__command_id-1))_flag_${s}_long}\${__command_$((__command_id-1))_flag_${s}_short}\""
+            names="$names \"\${__command_${__command_id}_flag_${s}_long}\${__command_${__command_id}_flag_${s}_short}\""
          done
          s="$names)
 __sort_values"
@@ -546,6 +546,7 @@ __sort_values"
         if eval "$result";then
             __command_name=''
             __command_flag=0
+            __command_id=$((__command_id+1))
         else
             errno=$?
             result_errno="eval string has error: $result"
