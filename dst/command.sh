@@ -8,10 +8,13 @@ if [[ ! -v __command_id ]];then
     __command_name=''
     __command_short=''
     __command_long=''
+    __command_func=''
     __command_children=()
     __command_flag=0
     __command_flags=()
+    
     __command_id=0
+
 fi
 
 __command_join(){
@@ -195,14 +198,14 @@ command_flags(){
         fi
         n=${#@}
     done
-    if [[ "$long" != help ]] && [[ ! "$var" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]];then
-        result_errno='--var must matched with =~ ^[a-zA-Z_][a-zA-Z0-9_]*$'
-        return 1
-    fi
     if [[ "$long" == '' ]];then
         result_errno='long flag must be specified'
         return 1
     fi
+    if [[ "$long" != help ]] && [[ ! "$var" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]];then
+        result_errno='--var must matched with =~ ^[a-zA-Z_][a-zA-Z0-9_]*$'
+        return 1
+    fi    
     if [[ "$short" != '' ]];then
       if [[ "$short" != ? ]];then
             result_errno='short flag must be a char'
@@ -213,6 +216,69 @@ command_flags(){
     local flag=$__command_flag
     local id=$__command_id
     local prefix="__command_${id}_flag_${flag}"
+
+    local s_val
+    case "$type" in
+        int|ints)
+            if [[ "$max" != '' ]] && [[ ! "$max" =~ ^-?[0-9]+$ ]];then
+                result_errno="--max must specify a valid int value"
+                return 1
+            fi
+            if [[ "$min" != '' ]] && [[ ! "$min" =~ ^-?[0-9]+$ ]];then
+                result_errno="--min must specify a valid int value"
+                return 1
+            fi
+            for s_val in "${value[@]}";do
+                if [[ ! "$s_val" =~ ^-?[0-9]+$ ]];then
+                    result_errno="--value must specify a valid int value"
+                    return 1
+                fi
+            done
+            for s_val in "${default[@]}";do
+                if [[ ! "$s_val" =~ ^-?[0-9]+$ ]];then
+                    result_errno="--default must specify a valid int value"
+                    return 1
+                fi
+            done
+        ;;
+        uint|uints)
+            if [[ "$max" != '' ]] && [[ ! "$max" =~ ^[0-9]+$ ]];then
+                result_errno="--max must specify a valid uint value"
+                return 1
+            fi
+            if [[ "$min" != '' ]] && [[ ! "$min" =~ ^[0-9]+$ ]];then
+                result_errno="--min must specify a valid uint value"
+                return 1
+            fi
+            for s_val in "${value[@]}";do
+                if [[ ! "$s_val" =~ ^[0-9]+$ ]];then
+                    result_errno="--value must specify a valid uint value"
+                    return 1
+                fi
+            done
+            for s_val in "${default[@]}";do
+                if [[ ! "$s_val" =~ ^[0-9]+$ ]];then
+                    result_errno="--default must specify a valid uint value"
+                    return 1
+                fi
+            done
+        ;;
+        bool|bools)
+            for s_val in "${value[@]}";do
+                if [[ "$s_val" != true ]] && [[ "$s_val" != false ]];then
+                    result_errno="--value must specify a valid bool value"
+                    return 1
+                fi
+            done
+            for s_val in "${default[@]}";do
+                if [[ "$s_val" != true ]] && [[ "$s_val" != false ]];then
+                    result_errno="--default must specify a valid bool value"
+                    return 1
+                fi
+            done
+        ;;
+    esac
+
     local s_default
     case "$type" in
         string|int|uint|bool)
@@ -226,46 +292,61 @@ command_flags(){
             return 1
         ;;
     esac
-
-    local s_val
-    case "$type" in
-        int|ints)
-            if [[ "$max" != '' ]] && [[ ! "$max" =~ ^-?[0-9]+$ ]];then
-                result_errno="--max must specify a valid int value"
+    local vars=""
+    local longs=""
+    local shorts=""
+    local i
+    for i in "${__command_flags[@]}";do
+        vars="$vars  \"\$__command_${__command_id}_flag_${i}_var\""
+        longs="$longs  \"\$__command_${__command_id}_flag_${i}_long\""
+        shorts="$shorts  \"\$__command_${__command_id}_flag_${i}_short\""
+    done
+    local s="__command_flag_commit(){
+    local vars=($vars)
+    local longs=($longs)
+    local shorts=($shorts)
+    local s
+    for s in \"\${vars[@]}\";do
+        if [[ \"\$s\" == \"\$var\" ]];then
+            result_errno=\"var flag already exists: \$s\"
+            return 1
+        fi
+    done
+    for s in \"\${longs[@]}\";do
+        if [[ \"\$s\" == \"\$long\" ]];then
+            result_errno=\"long flag already exists: \$s\"
+            return 1
+        fi
+    done
+    if [[ \"\$short\" != '' ]];then
+        for s in \"\${shorts[@]}\";do
+            if [[ \"\$s\" == \"\$short\" ]];then
+                result_errno=\"short flag already exists: \$s\"
                 return 1
             fi
-            if [[ "$min" != '' ]] && [[ ! "$min" =~ ^-?[0-9]+$ ]];then
-                result_errno="--min must specify a valid int value"
-                return 1
-            fi
-        ;;
-        uint|uints)
-            if [[ "$max" != '' ]] && [[ ! "$max" =~ ^[0-9]+$ ]];then
-                result_errno="--max must specify a valid uint value"
-                return 1
-            fi
-            if [[ "$min" != '' ]] && [[ ! "$min" =~ ^[0-9]+$ ]];then
-                result_errno="--min must specify a valid uint value"
-                return 1
-            fi
-        ;;
-    esac
-    local s="${prefix}_var=\$var
-${prefix}_long=\$long
-${prefix}_short=\$short
-${prefix}_type=\$type
-${prefix}_describe=\$describe
-${prefix}_max=\$max
-${prefix}_min=\$min
-${prefix}_value=(\"\${value[@]}\")
-${prefix}_pattern=(\"\${pattern[@]}\")
-${prefix}_regexp=(\"\${regexp[@]}\")
-$s_default
+        done
+    fi
+    ${prefix}_var=\$var
+    ${prefix}_long=\$long
+    ${prefix}_short=\$short
+    ${prefix}_type=\$type
+    ${prefix}_describe=\$describe
+    ${prefix}_max=\$max
+    ${prefix}_min=\$min
+    ${prefix}_value=(\"\${value[@]}\")
+    ${prefix}_pattern=(\"\${pattern[@]}\")
+    ${prefix}_regexp=(\"\${regexp[@]}\")
+    $s_default
+}
 "
     # echo "$s"
     if eval "$s";then
-        __command_flags+=("$flag")
-        __command_flag=$((__command_flag+1))
+        if __command_flag_commit ;then
+            __command_flags+=("$flag")
+            __command_flag=$((__command_flag+1))
+        else
+            return $?
+        fi
     else
         local errno=$?
         result_errno="eval has error: $s"
@@ -324,6 +405,7 @@ command_begin(){
     else
         __command_long=$long
     fi
+    __command_func=$func
     __command_children=()
     __command_flags=()
 
@@ -456,7 +538,7 @@ ${prefix}_help(){
 "
     done
     s="$s$sf"
-echo "$s"
+    # echo "$s"
     # children help
     n=${#__command_children[@]}
     if ((n>0));then
@@ -482,6 +564,7 @@ command_string(){
 ${prefix}_name=\$__command_name
 ${prefix}_short=\$__command_short
 ${prefix}_long=\$__command_long
+${prefix}_func=\$__command_func
 "
     __command_help
     ### execute
@@ -521,6 +604,10 @@ __sort_values(){
 # () (errno)
 # generate command code and load it with eval
 command_commit(){
+    if [[ "$__command_name" == '' ]];then
+        result_errno="please call command_begin to begin a new command"
+        return 1
+    fi
     local errno=0
     local n=${#__command_flags[@]}
     if (($n>1));then
@@ -543,6 +630,7 @@ __sort_values"
          fi
     fi
     if command_string ;then
+        # echo "$result"
         if eval "$result";then
             __command_name=''
             __command_flag=0
