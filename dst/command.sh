@@ -629,6 +629,26 @@ __sort_values"
             return $errno
          fi
     fi
+    n=${#__command_children[@]}
+    if (($n>1));then
+        local values=("${__command_children[@]}")
+        # sort flags
+         local names="names=("
+         local s
+         for s in "${__command_children[@]}";do
+            names="$names \"\$__command_${s}_name\""
+         done
+         s="$names)
+__sort_values"
+        #  echo "$s"
+         if eval "$s";then
+            __command_children=("${values[@]}")
+         else
+            errno=$?
+            result_errno="eval sort_children has error: $s"
+            return $errno
+         fi
+    fi
     if command_string ;then
         # echo "$result"
         if eval "$result";then
@@ -643,4 +663,10 @@ __sort_values"
         errno=$?
     fi
     return $errno
+}
+# (id: number, ...args: []string): errno
+command_execute(){
+    local id="$1"
+    local s=""
+    echo "$s"
 }
