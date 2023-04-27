@@ -142,6 +142,71 @@ __command_flags_parse(){
 
 # (long: string, short:string, arg0: string, args1: string) (shift_val: string, shift_n: string) 
 
+__command_flags_verify_value(){
+    case "$_type" in 
+        bool|bools)
+            if [[ "$_result" != true ]] && [[ "$_result" != false ]];then
+                _errno=1
+                result_errno="invalid flag value: $1 $_result"
+                return
+            fi
+        ;;
+        uint|uints)
+            if [[ ! "$_result" =~ ^-?[0-9]+$ ]];then
+                _errno=1
+                result_errno="invalid flag value: $1 $_result"
+                return
+            fi
+        ;;
+        uint|uints)
+            if [[ ! "$_result" =~ ^[0-9]+$ ]];then
+                _errno=1
+                result_errno="invalid flag value: $1 $_result"
+                return
+            fi
+        ;;
+    esac
+
+    if [[ $_max != '' ]] && ((_result>_max));then
+        _errno=1
+        result_errno="invalid flag value: $1 $_result"
+        return
+    fi
+    if [[ $_min != '' ]] && ((_result<_min));then
+        _errno=1
+        result_errno="invalid flag value: $1 $_result"
+        return
+    fi
+    local matched=1
+    local s
+    for s in "${_value[@]}";do
+        matched=0
+        if [[ "$_result" == "$s" ]];then
+            _input=0
+            return
+        fi
+    done
+    for s in "${_pattern[@]}";do
+        matched=0
+        if [[ "$_result" == $s ]];then
+            _input=0
+            return
+        fi
+    done
+    for s in "${_regexp[@]}";do
+        matched=0
+        if [[ "$_result" =~ $s ]];then
+            _input=0
+            return
+        fi
+    done
+    if [[ $matched == 0 ]];then
+        _errno=1
+        result_errno="invalid flag value: $1 $_result"
+    else
+        _input=0
+    fi
+}
 # _input 
 # _n
 #
@@ -155,44 +220,74 @@ __command_flags_parse(){
 # _regexp
 #
 # out _errno
-# out _ok
+# out _result
 # out _shift
 __command_flags_parse_value(){
-    if [[ "$3" == "--$1" ]];then
-        shift_val=$4
-        shift_n=2
-        return
+    _errno=0
+    _shift=-1
+    if [[ $_input == 1 ]];then
+        local flag="-$1"
+    else
+        if [[ "$_long" == "--$1" ]];then
+            if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
+                _result=true
+                _shift=1
+                return
+            fi
+            _result=$2
+            _shift=2
+            __command_flags_verify_value "--$_long"
+            return
+        fi
+        local s="--${_long}="
+        local n=${#s}
+        if [[ "${1:0:n}" == "$s" ]];then
+            _result=${1:n}
+            _shift=1
+            __command_flags_verify_value "--$_long"
+            return
+        fi
+        local flag="$1"
     fi
-    local s="--$1="
-    local n=${#s}
-    if [[ "${3:0:n}" == "$s" ]];then
-        shift_val=${3:n}
-        shift_n=1
-        return
-    fi
+
     
-    if [[ $2 == '' ]];then
-        return 1
-    elif [[ "$3" == "-$2" ]];then
-        shift_val=$4
-        shift_n=2
+    if [[ "$_short" == '' ]];then
+        return 
+    elif [[ "$flag" == "-$_short" ]];then
+        if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
+            _result=true
+            _shift=1
+            return
+        fi
+        _result=$2
+        _shift=2
+        __command_flags_verify_value "-$_short"
         return
     fi
-    s="-$2="
+    s="-$_short="
     n=${#s}
-    if [[ "${3:0:n}" == $s ]];then
-        shift_val=${3:n}
-        shift_n=1
+    if [[ "${flag:0:n}" == "$s" ]];then
+        _result=${flag:n}
+        _shift=1
+        __command_flags_verify_value "-$_short"
         return
     fi
-    s="-$2"
+    s="-$_short"
     n=${#s}
-    if [[ "${3:0:n}" == $s ]];then
-        shift_val=${3:n}
-        shift_n=1
+    if [[ "${flag:0:n}" == $s ]];then
+        _result=${flag:n}
+        if [[ "$result" == '' ]];then
+            _shift=1
+        else
+            _shift=0
+        fi
+        if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
+            _result=true
+            return
+        fi
+        __command_flags_verify_value "-$_short"
         return
     fi
-    return 1
 }
 
 # (...): errno
@@ -691,12 +786,12 @@ var=\$${prefix}_flag_${flag}_var
     if [[ "$type" == *s ]];then
         s1="if [[ \$_${flag}_default == 1 ]];then
                     _${flag}_default=0
-                    $var=(\"\$_value\")
+                    $var=(\"\$_result\")
                 else
-                    $var+=(\"\$_value\")
+                    $var+=(\"\$_result\")
                 fi"
     else
-        s1="$var=\"\$_value\""
+        s1="$var=\"\$_result\""
     fi
 }
 __command_generate_execute(){
@@ -758,8 +853,8 @@ ${prefix}_execute(){
     local _pattern
     local _regexp
     local _errno
-    local _ok
-    local _shift
+    local _result
+    local _shift=0
 "
     for flag in "${__command_flags[@]}";do
         if __command_define_var "$flag";then
@@ -777,8 +872,8 @@ ${prefix}_execute(){
         if [[ \$_shift != 0 ]];then
             shift \$_shift
         fi
-        n=\${#@}
-        if [[ \$n == 0 ]];then
+        _n=\${#@}
+        if [[ \$_n == 0 ]];then
             break
         fi
         if [[ \$_input == 1 ]] || [[ \"\$1\" == -* ]];then
@@ -946,7 +1041,7 @@ command_execute(){
     return 1
 fi
 local __command_parent=''
-__command_${id}_execute \"$@\"
+__command_${id}_execute \"\$@\"
 "
     eval "$s"
     return $?

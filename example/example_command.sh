@@ -42,7 +42,7 @@ main(){
    
     # __command_0_help
 
-    # core_call_default command_execute $id "$@"
+    core_call_default command_execute $id "$@"
 }
 main "$@"
 
