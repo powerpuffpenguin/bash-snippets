@@ -492,19 +492,66 @@ ${prefix}_execute(){
     result=$s
 }
 
+__sort_flags(){
+    local flags=("${__command_flags[@]}")
+    # echo "${#flags[@]}: ${flags[@]}"
+    # echo "${#names[@]}: ${names[@]}"
+    local len=${#flags[@]}
+    local i
+    local j
+    local left
+    local right
+    local index
+	for ((i = 0; i < len - 1; i++)); do
+        for ((j=0;j<len-i-1;j++));do
+            left=${names[j]}
+            right=${names[j+1]}
+            if [[ "$left" > "$right" ]];then
+                names[j]=$right
+                names[j+1]=$left
+
+                left=${flags[j]}
+                right=${flags[j+1]}
+                flags[j]=$right
+                flags[j+1]=$left
+            fi
+        done
+    done
+	__command_flags=("${flags[@]}")
+}
 # () (errno)
 # generate command code and load it with eval
 command_commit(){
+    local errno
+    local n=${#__command_flags[@]}
+    if (($n>1));then
+        # sort flags
+         local names="names=("
+         local s
+         for s in "${__command_flags[@]}";do
+            names="$names \"\${__command_$((__command_id-1))_flag_${s}_long}\${__command_$((__command_id-1))_flag_${s}_short}\""
+         done
+         s="$names)
+__sort_flags"
+        #  echo "$s"
+         if eval "$s";then
+            errno=0
+         else
+            errno=$?
+            result_errno="eval has error: $s"
+            return $errno
+         fi
+    fi
     if command_string ;then
         if eval "$result";then
             __command_name=''
             __command_flag=0
-            return
         else
+            errno=$?
             result_errno="eval has error: $result"
-            return $?
         fi
     else
-        return $?
+        errno=$?
     fi
+    return $errno
 }
