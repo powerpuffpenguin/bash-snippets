@@ -6,9 +6,21 @@ cd `dirname $BASH_SOURCE`
 source ../dst/command.sh
 source ../dst/core.sh
 
+on_main(){
+    echo "--- on_main ---"
+    echo "listen=$listen"
+    echo "port=$port"
+    echo "thread=$thread"
+    echo "zone=(${zone[@]})"
+    echo "upload=(${upload[@]})"
+    echo "tokens=(${tokens[@]})"
+}
+
 main(){
     core_call_default command_begin --name "`basename $BASH_SOURCE`" \
-        --short 'Example for command.sh'
+        --short 'Example for command.sh' \
+        --func on_main
+
     local id=$result
 
     core_call_default command_flags --type string '--describe=Listen address' \

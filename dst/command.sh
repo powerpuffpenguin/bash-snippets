@@ -525,6 +525,7 @@ command_flags(){
     $s_default
 }
 "
+
     # echo "$s"
     if eval "$s";then
         if __command_flag_commit ;then
@@ -755,9 +756,10 @@ var=\$${prefix}_flag_${flag}_var
         return $errno
     fi
     if [[ "$type" == *s ]];then
-        s0="    local $var=(\"\$${prefix}_flag_${flag}_default[@]\")
+        s0="    local $var=(\"\${${prefix}_flag_${flag}_default[@]}\")
     local _${flag}_default=1
 "
+
     else
         s0="    local $var=\$${prefix}_flag_${flag}_default
 "
