@@ -232,7 +232,7 @@ __command_flags_verify_value(){
 __command_flags_parse_value(){
     _errno=0
     _shift=-1
-    if [[ "$_input" != '' ]];then
+    if [[ "$_input" == '' ]];then
         if [[ "$1" == "--$_long" ]];then
             if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
                 _result=true
@@ -1062,6 +1062,7 @@ __sort_values"
 }
 # (id: number, ...args: []string): errno
 command_execute(){
+    result_errno=''
     local id="$1"
     shift
     if [[ ! "$id" =~ ^[0-9]+$ ]];then
@@ -1078,4 +1079,62 @@ __command_${id}_execute \"\$@\"
 "
     eval "$s"
     return $?
+}
+# (parent: number, ...child: []string): errno
+command_children(){
+    result_errno=''
+    local id="$1"
+    shift
+    if [[ ! "$id" =~ ^[0-9]+$ ]];then
+        result_errno="command id invalid: $id"
+        return 1
+    fi
+    local n=${#@}
+    if [[ $n == 0 ]];then
+        __command_children=()
+        return
+    fi
+
+    local s
+    local i=0
+    local j
+    local sj
+    local names
+    for s in "$@";do
+        if [[ ! "$s" =~ ^[0-9]+$ ]];then
+            result_errno="command id[$i] invalid: $id"
+            return 1
+        fi
+        j=0
+        for sj in "$@";do
+            if [[ $i != $j ]] && [[ "$s" == "$sj" ]];then
+                result_errno="children id[$i,$j] repeat: $s"
+                return 1
+            fi
+            j=$((j+1))
+        done
+        names="$names \"\$__command_${s}_name\""
+        i=$((i+1))
+    done
+    if eval "names=($names)";then
+        for s in "${names[@]}";do
+            if [[ "$s" == '' ]];then
+                result_errno="children name[$i] invalid: $s"
+                return 1
+            fi
+            j=0
+            for sj in "${names[@]}";do
+                if [[ $i != $j ]] && [[ "$s" == "$sj" ]];then
+                    result_errno="children name[$i,$j] repeat: $s"
+                    return 1
+                fi
+                j=$((j+1))
+            done
+            i=$((i+1))
+        done
+    else
+        return $?    
+    fi
+    
+    __command_children=("$@")
 }

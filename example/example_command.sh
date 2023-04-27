@@ -15,7 +15,7 @@ on_main(){
     echo "zone=(${zone[@]})"
     echo "upload=(${upload[@]})"
     echo "tokens=(${tokens[@]})"
-    echo "args[${#@}]=$@"
+    echo "args[${#@}]=($@)"
 }
 
 
