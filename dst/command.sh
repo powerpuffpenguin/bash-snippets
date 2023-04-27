@@ -491,12 +491,12 @@ ${prefix}_execute(){
 }"
     result=$s
 }
-
-__sort_flags(){
-    local flags=("${__command_flags[@]}")
-    # echo "${#flags[@]}: ${flags[@]}"
+# values: []string
+# names: []string
+__sort_values(){
+    # echo "${#values[@]}: ${values[@]}"
     # echo "${#names[@]}: ${names[@]}"
-    local len=${#flags[@]}
+    local len=${#values[@]}
     local i
     local j
     local left
@@ -510,21 +510,21 @@ __sort_flags(){
                 names[j]=$right
                 names[j+1]=$left
 
-                left=${flags[j]}
-                right=${flags[j+1]}
-                flags[j]=$right
-                flags[j+1]=$left
+                left=${values[j]}
+                right=${values[j+1]}
+                values[j]=$right
+                values[j+1]=$left
             fi
         done
     done
-	__command_flags=("${flags[@]}")
 }
 # () (errno)
 # generate command code and load it with eval
 command_commit(){
-    local errno
+    local errno=0
     local n=${#__command_flags[@]}
     if (($n>1));then
+        local values=("${__command_flags[@]}")
         # sort flags
          local names="names=("
          local s
@@ -532,13 +532,13 @@ command_commit(){
             names="$names \"\${__command_$((__command_id-1))_flag_${s}_long}\${__command_$((__command_id-1))_flag_${s}_short}\""
          done
          s="$names)
-__sort_flags"
+__sort_values"
         #  echo "$s"
          if eval "$s";then
-            errno=0
+            __command_flags=("${values[@]}")
          else
             errno=$?
-            result_errno="eval has error: $s"
+            result_errno="eval sort_flags has error: $s"
             return $errno
          fi
     fi
@@ -548,7 +548,7 @@ __sort_flags"
             __command_flag=0
         else
             errno=$?
-            result_errno="eval has error: $result"
+            result_errno="eval string has error: $result"
         fi
     else
         errno=$?
