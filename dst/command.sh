@@ -246,6 +246,11 @@ __command_flags_parse_value(){
                 _shift=1
                 return
             fi
+            if ((_n<2));then
+                _errno=1
+                result_errno="flag ${_type} requires a value: $_name $1"
+                return
+            fi
             _result=$2
             _shift=2
             __command_flags_verify_value "--$_long"
@@ -271,6 +276,11 @@ __command_flags_parse_value(){
             _shift=1
             return
         fi
+        if ((_n<2));then
+            _errno=1
+            result_errno="flag ${_type} requires a value: $_name $1"
+            return
+        fi
         _result=$2
         _shift=2
         __command_flags_verify_value "-$_short"
@@ -288,11 +298,14 @@ __command_flags_parse_value(){
     n=${#s}
     if [[ "${flag:0:n}" == $s ]];then
         _result=${flag:n}
-        if [[ "$result" == '' ]];then
+        if [[ "$_result" == '' ]];then
             _shift=1
+            _input=0
         else
             _shift=0
+            _input=1
         fi
+        echo "------- $flag $s $_shift '$_result'"
         if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
             _result=true
             return
