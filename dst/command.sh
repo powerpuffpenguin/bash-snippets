@@ -228,7 +228,7 @@ __command_flags_parse_value(){
     if [[ $_input == 1 ]];then
         local flag="-$1"
     else
-        if [[ "$_long" == "--$1" ]];then
+        if [[ "$1" == "--$_long" ]];then
             if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
                 _result=true
                 _shift=1
