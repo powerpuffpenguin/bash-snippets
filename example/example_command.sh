@@ -32,11 +32,11 @@ main(){
         -v tokens -l tokens \
         -R '^[a-zA-Z0-9]+$' -R 'king*'
 
-    __command_1_name=def
-    __command_2_name=abc123
-    __command_1_short='short def'
-    __command_2_short='short abc'
-    __command_children=(1 2)
+    # __command_1_name=def
+    # __command_2_name=abc123
+    # __command_1_short='short def'
+    # __command_2_short='short abc'
+    # __command_children=(1 2)
 
     core_call_default command_commit
    

@@ -458,7 +458,8 @@ command_flags(){
             return 1
         ;;
     esac
-    if [[ ${#default[@]} == 0 ]];then
+    n=${#default[@]}
+    if [[ $n == 0 ]];then
         case "$type" in
             string)
                 default=('')
@@ -467,7 +468,13 @@ command_flags(){
                 default=(0)
             ;;
             bool)
-                default=false
+                default=(false)
+            ;;
+        esac
+    elif [[ $n != 1 ]];then
+        case "$type" in
+            string|int|uint|bool)
+                default=("${default[n-1]}")
             ;;
         esac
     fi
@@ -771,9 +778,9 @@ var=\$${prefix}_flag_${flag}_var
            _type=\$${prefix}_flag_${flag}_type
            _max=\$${prefix}_flag_${flag}_max
            _min=\$${prefix}_flag_${flag}_min
-           _value=(\"\$${prefix}_flag_${flag}_value[@]\")
-           _pattern=(\"\$${prefix}_flag_${flag}_pattern[@]\")
-           _regexp=(\"\$${prefix}_flag_${flag}_regexp[@]\")
+           _value=(\"\${${prefix}_flag_${flag}_value[@]}\")
+           _pattern=(\"\${${prefix}_flag_${flag}_pattern[@]}\")
+           _regexp=(\"\${${prefix}_flag_${flag}_regexp[@]}\")
            __command_flags_parse_value \"\$1\" \"\$2\""
         if [[ "$var" == '' ]];then
             var="_help"
