@@ -140,28 +140,26 @@ __command_flags_parse(){
     return 1
 }
 
-# (long: string, short:string, arg0: string, args1: string) (shift_val: string, shift_n: string) 
-
 __command_flags_verify_value(){
     case "$_type" in 
         bool|bools)
             if [[ "$_result" != true ]] && [[ "$_result" != false ]];then
                 _errno=1
-                result_errno="invalid flag value: $1 $_result"
+                result_errno="invalid flag ${_type}: $_name $1 $_result"
                 return
             fi
         ;;
-        uint|uints)
+        int|ints)
             if [[ ! "$_result" =~ ^-?[0-9]+$ ]];then
                 _errno=1
-                result_errno="invalid flag value: $1 $_result"
+                result_errno="invalid flag ${_type}: $_name $1 $_result"
                 return
             fi
         ;;
         uint|uints)
             if [[ ! "$_result" =~ ^[0-9]+$ ]];then
                 _errno=1
-                result_errno="invalid flag value: $1 $_result"
+                result_errno="invalid flag [${_type}]: $_name $1 $_result"
                 return
             fi
         ;;
@@ -169,12 +167,12 @@ __command_flags_verify_value(){
 
     if [[ $_max != '' ]] && ((_result>_max));then
         _errno=1
-        result_errno="invalid flag value: $1 $_result"
+        result_errno="invalid flag [${_type}<=$_max]: $_name $1 $_result"
         return
     fi
     if [[ $_min != '' ]] && ((_result<_min));then
         _errno=1
-        result_errno="invalid flag value: $1 $_result"
+        result_errno="invalid flag [${_type}>=$_min]: $_name $1 $_result"
         return
     fi
     local matched=1
@@ -202,11 +200,25 @@ __command_flags_verify_value(){
     done
     if [[ $matched == 0 ]];then
         _errno=1
-        result_errno="invalid flag value: $1 $_result"
+        local rules
+        s="${_value[@]}"
+        if [[ "$s" != '' ]];then
+            rules=" (== $s)"
+        fi
+        s="${_pattern[@]}"
+        if [[ "$s" != '' ]];then
+            rules="$rules (== $s)"
+        fi
+        s="${_regexp[@]}"
+        if [[ "$s" != '' ]];then
+            rules="$rules (== $s)"
+        fi
+        result_errno="invalid flag [${_type}$rules]: $_name $1 $_result"
     else
         _input=0
     fi
 }
+# _name
 # _input 
 # _n
 #
@@ -817,6 +829,11 @@ ${prefix}_execute(){
     local _args=()
     local _i
     local _n=\${#@}
+    if [[ \$__command_parent == '' ]];then
+        local _name=\$${prefix}_name
+    else
+        local _name=\"\$__command_parent \$${prefix}_name\"
+    fi
 "
     local n=${#__command_children[@]}
     if ((n>0));then
@@ -904,9 +921,9 @@ ${prefix}_execute(){
         i=$((i+1)) 
     done
     s="$s           if [[ \$_input == 1 ]];then
-               result_errno=\"unknown flag: -\$1\"
+               result_errno=\"unknown flag: \$_name -\$1\"
            else
-               result_errno=\"unknown flag: \$1\"
+               result_errno=\"unknown flag: \$_name \$1\"
            fi
            return 1
 "
