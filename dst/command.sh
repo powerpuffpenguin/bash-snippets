@@ -49,8 +49,24 @@ __command_flags_describe(){
             __command_join "${default[@]}"
             s="$s (default [$result])"
         fi
-    elif [[ "$default" != '' ]];then
-        s="$s (default $default)"
+    else
+        case "$type" in
+            string)
+                if [[ "$default" != '' ]];then
+                    s="$s (default $default)"
+                fi
+            ;;
+            int|uint)
+                if [[ "$default" != 0 ]];then
+                    s="$s (default $default)"
+                fi
+            ;;
+            bool)
+                if [[ "$default" != false ]];then
+                    s="$s (default $default)"
+                fi
+            ;;
+        esac
     fi
     case "$type" in
         int|uint|ints|uints)
@@ -86,7 +102,7 @@ __command_flags_describe(){
 }
 
 # (long: string, short:string, arg0: string, args1: string) (shift_val: string, shift_n: string) 
-__command_flags(){
+__command_flags_parse(){
     if [[ "$3" == "--$1" ]];then
         shift_val=$4
         shift_n=2
@@ -123,6 +139,62 @@ __command_flags(){
     fi
     return 1
 }
+
+# (long: string, short:string, arg0: string, args1: string) (shift_val: string, shift_n: string) 
+
+# _input 
+# _n
+#
+# _long
+# _short
+# _type
+# _max
+# _min
+# _value
+# _pattern
+# _regexp
+#
+# out _errno
+# out _ok
+# out _shift
+__command_flags_parse_value(){
+    if [[ "$3" == "--$1" ]];then
+        shift_val=$4
+        shift_n=2
+        return
+    fi
+    local s="--$1="
+    local n=${#s}
+    if [[ "${3:0:n}" == "$s" ]];then
+        shift_val=${3:n}
+        shift_n=1
+        return
+    fi
+    
+    if [[ $2 == '' ]];then
+        return 1
+    elif [[ "$3" == "-$2" ]];then
+        shift_val=$4
+        shift_n=2
+        return
+    fi
+    s="-$2="
+    n=${#s}
+    if [[ "${3:0:n}" == $s ]];then
+        shift_val=${3:n}
+        shift_n=1
+        return
+    fi
+    s="-$2"
+    n=${#s}
+    if [[ "${3:0:n}" == $s ]];then
+        shift_val=${3:n}
+        shift_n=1
+        return
+    fi
+    return 1
+}
+
 # (...): errno
 # define a flag for current command
 # -v, --var string(^[a-zA-Z_][a-zA-Z0-9_]*$)  Varname of this flag 
@@ -159,37 +231,37 @@ command_flags(){
     local shift_val
     local shift_n
     while ((n>0)); do
-        if __command_flags var v "$1" "$2";then
+        if __command_flags_parse var v "$1" "$2";then
             var=$shift_val
             shift $shift_n
-        elif __command_flags long l "$1" "$2";then
+        elif __command_flags_parse long l "$1" "$2";then
             long=$shift_val
             shift $shift_n
-        elif __command_flags short s "$1" "$2";then
+        elif __command_flags_parse short s "$1" "$2";then
             short=$shift_val
             shift $shift_n
-        elif __command_flags type t "$1" "$2";then
+        elif __command_flags_parse type t "$1" "$2";then
             type=$shift_val
             shift $shift_n
-        elif __command_flags describe d "$1" "$2";then
+        elif __command_flags_parse describe d "$1" "$2";then
             describe=$shift_val
             shift $shift_n
-        elif __command_flags max '' "$1" "$2";then
+        elif __command_flags_parse max '' "$1" "$2";then
             max=$shift_val
             shift $shift_n
-        elif __command_flags min '' "$1" "$2";then
+        elif __command_flags_parse min '' "$1" "$2";then
             min=$shift_val
             shift $shift_n
-        elif __command_flags value V "$1" "$2";then
+        elif __command_flags_parse value V "$1" "$2";then
             value+=("$shift_val")
             shift $shift_n
-        elif __command_flags pattern P "$1" "$2";then
+        elif __command_flags_parse pattern P "$1" "$2";then
             pattern+=("$shift_val")
             shift $shift_n
-        elif __command_flags regexp R "$1" "$2";then
+        elif __command_flags_parse regexp R "$1" "$2";then
             regexp+=("$shift_val")
             shift $shift_n
-        elif __command_flags default D "$1" "$2";then
+        elif __command_flags_parse default D "$1" "$2";then
             default+=("$shift_val")
             shift $shift_n
         else
@@ -278,7 +350,6 @@ command_flags(){
             done
         ;;
     esac
-
     local s_default
     case "$type" in
         string|int|uint|bool)
@@ -292,6 +363,19 @@ command_flags(){
             return 1
         ;;
     esac
+    if [[ ${#default[@]} == 0 ]];then
+        case "$type" in
+            string)
+                default=('')
+            ;;
+            int|uint)
+                default=(0)
+            ;;
+            bool)
+                default=false
+            ;;
+        esac
+    fi
     local vars=""
     local longs=""
     local shorts=""
@@ -374,16 +458,16 @@ command_begin(){
     local shift_val
     local shift_n
     while ((n>0)); do
-        if __command_flags name n "$1" "$2";then
+        if __command_flags_parse name n "$1" "$2";then
             name=$shift_val
             shift $shift_n
-        elif __command_flags long l "$1" "$2";then
+        elif __command_flags_parse long l "$1" "$2";then
             long=$shift_val
             shift $shift_n
-        elif __command_flags short s "$1" "$2";then
+        elif __command_flags_parse short s "$1" "$2";then
             short=$shift_val
             shift $shift_n
-        elif __command_flags func f "$1" "$2";then
+        elif __command_flags_parse func f "$1" "$2";then
             func=$shift_val
             shift $shift_n        
         else
@@ -413,7 +497,7 @@ command_begin(){
         --long help --short h
     result=$__command_id
 }
-__command_help(){
+__command_generate_help(){
     s="$s
 ${prefix}_help(){
     local min=0
@@ -550,6 +634,194 @@ ${prefix}_help(){
         s="$s}"
     fi
 }
+# in prefix: string
+# in flag: number
+# out s0: string
+__command_define_var(){
+    local errno=0
+    local type
+    local var
+    s0=''
+    if eval "type=\$${prefix}_flag_${flag}_type
+var=\$${prefix}_flag_${flag}_var
+";then
+        if [[ "$var" == '' ]];then
+            return
+        fi
+    else
+        errno=$?
+        return $errno
+    fi
+    if [[ "$type" == *s ]];then
+        s0="    local $var=(\"\$${prefix}_flag_${flag}_default[@]\")
+    local _${flag}_default=1
+"
+    else
+        s0="    local $var=\$${prefix}_flag_${flag}_default
+"
+    fi
+}
+# in prefix: string
+# in flag: number
+# out s0: string
+# out s1: string
+__command_parse_var(){
+    local errno=0
+    if eval "type=\$${prefix}_flag_${flag}_type
+var=\$${prefix}_flag_${flag}_var
+";then
+    s0="
+           _long=\$${prefix}_flag_${flag}_long
+           _short=\$${prefix}_flag_${flag}_short
+           _type=\$${prefix}_flag_${flag}_type
+           _max=\$${prefix}_flag_${flag}_max
+           _min=\$${prefix}_flag_${flag}_min
+           _value=(\"\$${prefix}_flag_${flag}_value[@]\")
+           _pattern=(\"\$${prefix}_flag_${flag}_pattern[@]\")
+           _regexp=(\"\$${prefix}_flag_${flag}_regexp[@]\")
+           __command_flags_parse_value \"\$1\" \"\$2\""
+        if [[ "$var" == '' ]];then
+            var="_help"
+        fi
+    else
+        errno=$?
+        return $errno
+    fi
+
+    if [[ "$type" == *s ]];then
+        s1="if [[ \$_${flag}_default == 1 ]];then
+                    _${flag}_default=0
+                    $var=(\"\$_value\")
+                else
+                    $var+=(\"\$_value\")
+                fi"
+    else
+        s1="$var=\"\$_value\""
+    fi
+}
+__command_generate_execute(){
+    local s0
+    local s1
+    local flag
+    local i
+    
+    s="$s
+${prefix}_execute(){
+    local _help=false
+    local _value
+    local _s
+    local _args=()
+    local _i
+    local _n=\${#@}
+"
+    local n=${#__command_children[@]}
+    if ((n>0));then
+        local children
+        local children_f
+        for s0 in "${__command_children[@]}";do
+            children="$children \"\$__command_${s0}_name\""
+            children_f="$children_f \"__command_${s0}_execute\""
+        done
+        s="$s
+    # children
+    if ((_n>0));then
+        local _children=($children)
+        local _children_f=($children_f)
+        _i=0
+        for _s in \"\${_children[@]}\";do
+            if [[ \"\$1\" == \"\$_s\" ]];then
+                _s=\${children_f[i]}
+                if [[ \"\$__command_parent\" == '' ]];then
+                    __command_parent=\$_s
+                else
+                    __command_parent=\"\$__command_parent \$_s\"
+                fi
+                shift
+                \"\$_s\" \"\$@\"
+                return \$?
+            fi
+            _i=\$((_i+1))
+        done
+    fi
+"
+    fi
+
+    s="$s
+    # flags
+    local _input=0
+    local _long
+    local _short
+    local _type
+    local _max
+    local _min
+    local _value
+    local _pattern
+    local _regexp
+    local _errno
+    local _ok
+    local _shift
+"
+    for flag in "${__command_flags[@]}";do
+        if __command_define_var "$flag";then
+            s="$s$s0"
+        else
+            return $?
+        fi
+    done
+
+    s="$s    while true;do
+        if [[ \$_help == true ]];then
+            __command_${id}_help
+            return $?
+        fi
+        if [[ \$_shift != 0 ]];then
+            shift \$_shift
+        fi
+        n=\${#@}
+        if [[ \$n == 0 ]];then
+            break
+        fi
+        if [[ \$_input == 1 ]] || [[ \"\$1\" == -* ]];then
+"
+
+    for flag in "${__command_flags[@]}";do
+        if __command_parse_var "$flag";then
+            s="$s           $s0
+           if [[ \$_errno != 0 ]];then
+                return \$_errno
+           elif ((_shift>=0));then
+                $s1
+                continue
+           fi
+"
+        else
+            return $?
+        fi
+        i=$((i+1)) 
+    done
+    s="$s           if [[ \$_input == 1 ]];then
+               result_errno=\"unknown flag: -\$1\"
+           else
+               result_errno=\"unknown flag: \$1\"
+           fi
+           return 1
+"
+    s="$s        else
+            _args+=(\"\$1\") 
+            shift=1
+        fi
+    done
+"
+
+    s="$s
+    # callbackup
+    if [[ \"\$${prefix}_func\" != '' ]];then
+        \"\$${prefix}_func\" \"\${_args[@]}\"
+        return \$?
+    fi
+}"
+    # echo "$s"
+}
 # () (string, errno)
 # get current command eval string
 command_string(){
@@ -566,12 +838,8 @@ ${prefix}_short=\$__command_short
 ${prefix}_long=\$__command_long
 ${prefix}_func=\$__command_func
 "
-    __command_help
-    ### execute
-    s="$s
-${prefix}_execute(){
-    return
-}"
+    __command_generate_help
+    __command_generate_execute
     result=$s
 }
 # values: []string
@@ -667,6 +935,19 @@ __sort_values"
 # (id: number, ...args: []string): errno
 command_execute(){
     local id="$1"
-    local s=""
-    echo "$s"
+    shift
+    if [[ ! "$id" =~ ^[0-9]+$ ]];then
+        result_errno="command id invalid: $id"
+        return 1
+    fi
+
+    local s="if [[ \"\$__command_${id}_name\" == '' ]];then
+    result_errno=\"command id invalid: $id\"
+    return 1
+fi
+local __command_parent=''
+__command_${id}_execute \"$@\"
+"
+    eval "$s"
+    return $?
 }

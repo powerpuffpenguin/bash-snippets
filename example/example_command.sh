@@ -9,6 +9,7 @@ source ../dst/core.sh
 main(){
     core_call_default command_begin --name "`basename $BASH_SOURCE`" \
         --short 'Example for command.sh'
+    local id=$result
 
     core_call_default command_flags --type string '--describe=Listen address' \
         -v listen --long=listen -sl \
@@ -39,7 +40,9 @@ main(){
 
     core_call_default command_commit
    
-    __command_0_help
+    # __command_0_help
+
+    # core_call_default command_execute $id "$@"
 }
 main "$@"
 
