@@ -180,21 +180,18 @@ __command_flags_verify_value(){
     for s in "${_value[@]}";do
         matched=0
         if [[ "$_result" == "$s" ]];then
-            _input=0
             return
         fi
     done
     for s in "${_pattern[@]}";do
         matched=0
         if [[ "$_result" == $s ]];then
-            _input=0
             return
         fi
     done
     for s in "${_regexp[@]}";do
         matched=0
         if [[ "$_result" =~ $s ]];then
-            _input=0
             return
         fi
     done
@@ -214,8 +211,6 @@ __command_flags_verify_value(){
             rules="$rules (== $s)"
         fi
         result_errno="invalid flag [${_type}$rules]: $_name $1 $_result"
-    else
-        _input=0
     fi
 }
 # _name
@@ -237,9 +232,7 @@ __command_flags_verify_value(){
 __command_flags_parse_value(){
     _errno=0
     _shift=-1
-    if [[ $_input == 1 ]];then
-        local flag="-$1"
-    else
+    if [[ "$_input" != '' ]];then
         if [[ "$1" == "--$_long" ]];then
             if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
                 _result=true
@@ -264,13 +257,12 @@ __command_flags_parse_value(){
             __command_flags_verify_value "--$_long"
             return
         fi
-        local flag="$1"
     fi
 
     
     if [[ "$_short" == '' ]];then
         return 
-    elif [[ "$flag" == "-$_short" ]];then
+    elif [[ "$1" == "-$_short" ]];then
         if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
             _result=true
             _shift=1
@@ -288,28 +280,23 @@ __command_flags_parse_value(){
     fi
     s="-$_short="
     n=${#s}
-    if [[ "${flag:0:n}" == "$s" ]];then
-        _result=${flag:n}
+    if [[ "${1:0:n}" == "$s" ]];then
+        _result=${1:n}
         _shift=1
         __command_flags_verify_value "-$_short"
         return
     fi
     s="-$_short"
     n=${#s}
-    if [[ "${flag:0:n}" == $s ]];then
-        _result=${flag:n}
-        if [[ "$_result" == '' ]];then
-            _shift=1
-            _input=0
-        else
-            _shift=0
-            _input=1
-        fi
-        echo "------- $flag $s $_shift '$_result'"
+    if [[ "${1:0:n}" == "$s" ]];then
+        _result=${1:n}
         if [[ "$_type" == bool ]] || [[ "$_type" == bools ]];then
+            _shift=0
+            _input="-$_result"
             _result=true
             return
         fi
+        _shift=1
         __command_flags_verify_value "-$_short"
         return
     fi
@@ -808,7 +795,7 @@ var=\$${prefix}_flag_${flag}_var
            _value=(\"\${${prefix}_flag_${flag}_value[@]}\")
            _pattern=(\"\${${prefix}_flag_${flag}_pattern[@]}\")
            _regexp=(\"\${${prefix}_flag_${flag}_regexp[@]}\")
-           __command_flags_parse_value \"\$1\" \"\$2\""
+           __command_flags_parse_value \"\$_input_flag\" \"\$2\""
         if [[ "$var" == '' ]];then
             var="_help"
         fi
@@ -882,7 +869,8 @@ ${prefix}_execute(){
 
     s="$s
     # flags
-    local _input=0
+    local _input
+    local _input_flag
     local _long
     local _short
     local _type
@@ -910,12 +898,18 @@ ${prefix}_execute(){
         fi
         if [[ \$_shift != 0 ]];then
             shift \$_shift
+            _input=''
         fi
         _n=\${#@}
         if [[ \$_n == 0 ]];then
             break
         fi
-        if [[ \$_input == 1 ]] || [[ \"\$1\" == -* ]];then
+        if [[ \"\$1\" == -* ]];then
+            if [[ \"\$_input\" == '' ]];then
+                _input_flag=\$1
+            else
+                _input_flag=\$_input
+            fi
 "
 
     for flag in "${__command_flags[@]}";do
@@ -933,10 +927,10 @@ ${prefix}_execute(){
         fi
         i=$((i+1)) 
     done
-    s="$s           if [[ \$_input == 1 ]];then
-               result_errno=\"unknown flag: \$_name -\$1\"
-           else
+    s="$s           if [[ \"\$_input\" == '' ]];then
                result_errno=\"unknown flag: \$_name \$1\"
+           else
+               result_errno=\"unknown flag: \$_name \$_input\"
            fi
            return 1
 "
