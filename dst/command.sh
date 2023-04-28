@@ -1080,15 +1080,10 @@ __command_${id}_execute \"\$@\"
     eval "$s"
     return $?
 }
-# (parent: number, ...child: []string): errno
+# (...children_id: []string): errno
 command_children(){
     result_errno=''
-    local id="$1"
-    shift
-    if [[ ! "$id" =~ ^[0-9]+$ ]];then
-        result_errno="command id invalid: $id"
-        return 1
-    fi
+
     local n=${#@}
     if [[ $n == 0 ]];then
         __command_children=()

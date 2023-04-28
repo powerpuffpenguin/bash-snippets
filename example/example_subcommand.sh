@@ -52,8 +52,7 @@ core_call_default command_flags -d "display version" \
     -v version -l version -s v
 
 # set subcommand 
-core_call_default command_children "$root" \
-    "$web"
+core_call_default command_children "$web"
 
 # commit root
 core_call_default command_commit

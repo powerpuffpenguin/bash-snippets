@@ -71,8 +71,7 @@ core_call_default command_flags -t string -d "Connect URL" \
 core_call_default command_flags -t bool -d "Run as debug mode" \
     -v debug -l debug
 
-core_call_default command_children "$client" \
-    "$web" "$grpc"
+core_call_default command_children "$web" "$grpc"
 core_call_default command_commit
 
 ### root ###
@@ -92,8 +91,7 @@ core_call_default command_flags -d "display version" \
     -v version -l version -s v
 
 # set subcommand 
-core_call_default command_children "$root" \
-    "$web" "$client"
+core_call_default command_children "$web" "$client"
 
 # commit root
 core_call_default command_commit
