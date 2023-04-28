@@ -52,7 +52,7 @@ core_call_default command_flags -d "display version" \
     -v version -l version -s v
 
 # set subcommand 
-command_children "$root" \
+core_call_default command_children "$root" \
     "$web"
 
 # commit root

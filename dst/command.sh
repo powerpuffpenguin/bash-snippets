@@ -851,12 +851,8 @@ ${prefix}_execute(){
         _i=0
         for _s in \"\${_children[@]}\";do
             if [[ \"\$1\" == \"\$_s\" ]];then
-                _s=\${children_f[i]}
-                if [[ \"\$__command_parent\" == '' ]];then
-                    __command_parent=\$_s
-                else
-                    __command_parent=\"\$__command_parent \$_s\"
-                fi
+                __command_parent=\$_name
+                _s=\${_children_f[_i]}
                 shift
                 \"\$_s\" \"\$@\"
                 return \$?
@@ -1117,6 +1113,7 @@ command_children(){
         i=$((i+1))
     done
     if eval "names=($names)";then
+        i=0
         for s in "${names[@]}";do
             if [[ "$s" == '' ]];then
                 result_errno="children name[$i] invalid: $s"
