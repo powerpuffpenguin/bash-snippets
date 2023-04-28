@@ -377,14 +377,18 @@ command_flags(){
         fi
         n=${#@}
     done
-    if [[ "$long" == '' ]];then
-        result_errno='long flag must be specified'
-        return 1
-    fi
-    if [[ "$long" != help ]] && [[ ! "$var" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]];then
+    if [[ "$var" == '' ]];then
+        if [[ "$long" != help ]];then
+            result_errno='--var flag must be specified with =~ ^[a-zA-Z_][a-zA-Z0-9_]*$'
+            return 1
+        fi
+    elif [[ ! "$var" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]];then
         result_errno='--var must matched with =~ ^[a-zA-Z_][a-zA-Z0-9_]*$'
         return 1
-    fi    
+    fi
+    if [[ "$long" == '' ]];then
+        long=$var
+    fi
     if [[ "$short" != '' ]];then
       if [[ "$short" != ? ]];then
             result_errno='short flag must be a char'

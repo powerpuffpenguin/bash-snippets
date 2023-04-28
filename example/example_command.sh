@@ -26,8 +26,9 @@ core_call_default command_begin --name "`basename $BASH_SOURCE`" \
 root=$result
 core_call_default command_flags --type bool '--describe=Run as debug' \
     -v debug --long debug --short d
+# if not specified -l|--long, will use same as -v|--var
 core_call_default command_flags --type string '--describe=Listen address' \
-    -v listen --long=listen -sl \
+    -v listen -sl \
     --default=::
 core_call_default command_flags --type uint --describe 'Listen port' \
     -v port --long port --short p \
