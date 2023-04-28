@@ -109,10 +109,10 @@ command_execute $root "$@"
 
 1. The defined on_main is automatically called as a callback function after the
    parameters are parsed, and it can obtain the value of the corresponding flags
-   through the variable name bound by the flags. Then save the command id into
-   the root variable
+   through the variable name bound by the flags
 2. command_begin starts a command, and specifies the description information and
-   the callback function of the command
+   the callback function of the command. Then save the command id into the root
+   variable
 3. Call command_flags repeatedly to specify the flags supported by the command,
    as well as the long name, short name, binding variable description, data type
    and value rules for this flag
