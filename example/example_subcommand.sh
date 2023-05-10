@@ -7,7 +7,6 @@ source ../dst/core.sh
 
 ### subcommand web of root ###
 on_web(){
-    set -e
     echo "--- on_web ---"
     echo "listen=$listen"
     echo "port=$port"
@@ -39,6 +38,7 @@ core_call_default command_commit
 on_main(){
     echo "--- on_main ---"
     echo "version=$version"
+    echo "tag=(${tag[@]})"
     echo "args[${#@}]=($@)"
 }
 # define root
@@ -50,6 +50,9 @@ root=$result
 # define flags of root
 core_call_default command_flags -d "display version" \
     -v version -l version -s v
+core_call_default command_flags -t strings -d "display tag" \
+    -v tag -s t \
+    -V t1 -V t2
 
 # set subcommand 
 core_call_default command_children "$web"
@@ -58,4 +61,4 @@ core_call_default command_children "$web"
 core_call_default command_commit
 
 # parse and execute
-command_execute "$root" "$@"
+core_call_default command_execute "$root" "$@"
