@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-
 cd `dirname $BASH_SOURCE`
 
 source ../dst/command.sh
@@ -8,6 +7,7 @@ source ../dst/core.sh
 
 ### subcommand web of root ###
 on_web(){
+    set -e
     echo "--- on_web ---"
     echo "listen=$listen"
     echo "port=$port"
@@ -58,4 +58,4 @@ core_call_default command_children "$web"
 core_call_default command_commit
 
 # parse and execute
-core_call_default command_execute "$root" "$@"
+command_execute "$root" "$@"

@@ -97,4 +97,4 @@ core_call_default command_children "$web" "$client"
 core_call_default command_commit
 
 # parse and execute
-core_call_default command_execute "$root" "$@"
+command_execute "$root" "$@"
