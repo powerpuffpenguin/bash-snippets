@@ -191,7 +191,7 @@ command_execute "$root" "$@"
 # -l, --long string   Long describe of command
 # -s, --short string   Short describe of command
 # -f, --func string   Function name of command
-function command_begin(...) (id: number, errno)
+function command_begin(...) (id: number, panic)
 ```
 
 command_begin 開始定義一個新的命令，它以命令解析的方式支持命名參數
@@ -225,7 +225,7 @@ command_begin --name "`basename $BASH_SOURCE`" \
 # -P, --pattern string Lists of valid values are compared using == $pattern[i]
 # -R, --regexp string Lists of valid values are compared using =~ $pattern[i]
 # -D, --default string  Default value when not specified
-function command_flags(): errno
+function command_flags(): panic
 ```
 
 command_flags 爲當前命令定義一個標記，它以命令解析的方式支持命名參數
@@ -249,7 +249,7 @@ command_flags 爲當前命令定義一個標記，它以命令解析的方式支
 # command_children
 
 ```
-function command_children(...children_id: []string): errno
+function command_children(...children_id: []string): panic
 ```
 
 爲當前命令指定子命令
@@ -265,7 +265,7 @@ function command_string() (string, errno)
 # command_commit
 
 ```
-function command_commit(): errno
+function command_commit(): panic
 ```
 
 完成當前命令的定義，爲其生成 bash 代碼並加載
@@ -273,7 +273,7 @@ function command_commit(): errno
 # command_execute
 
 ```
-function command_execute(id: number, ...args: []string): errno
+function command_execute(id: number, ...args: []string): panic
 ```
 
 將命令行參數傳遞給 id 指定的命令進行解析並執行

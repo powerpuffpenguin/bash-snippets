@@ -93,6 +93,13 @@ function strings_split(s: string, separators: string): []string
 > 上面函數返回一個數字到 result 變量，同時因爲存在 errno
 > 所以這個函數可能會出現錯誤 `return errno`
 
+```
+(): panic
+() (id: number, panic)
+```
+
+> panic 表示當函數出錯時會自動結束 bash，並打印調用棧和可用的錯誤信息
+
 # test
 
 只有經過測試的代碼才能放心使用，特別是 bash

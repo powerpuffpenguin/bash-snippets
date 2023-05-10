@@ -101,6 +101,14 @@ function strings_split(s: string, separators: string): []string
 > The above function returns a number to the result variable, and because of the
 > existence of errno, this function may have an error `return errno`
 
+```
+(): panic
+() (id: number, panic)
+```
+
+> panic means that when the function fails, bash will be automatically terminated, and the call stack and available error messages will be printed
+
+
 # test
 
 Only tested code should be used with confidence, especially bash Scripts are

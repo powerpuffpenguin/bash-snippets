@@ -15,24 +15,24 @@ on_web(){
     echo "args[${#@}]=($@)"
 }
 # define web
-core_call_default command_begin --name web \
+command_begin --name web \
     --short 'Start a web server' \
     --func on_web
 web=$result
 # define flags of web
-core_call_default command_flags -t string -d "Listen address" \
+command_flags -t string -d "Listen address" \
     -v listen -l listen -s l \
     -D '::'
-core_call_default command_flags -t string -d "Listen port" \
+command_flags -t string -d "Listen port" \
     -v port -l port -s p \
     -D '80' --min 1 --max 65535
-core_call_default command_flags -t bool -d "Run as debug mode" \
+command_flags -t bool -d "Run as debug mode" \
     -v debug -l debug
-core_call_default command_flags -t bool -d "Enable h2c supported" \
+command_flags -t bool -d "Enable h2c supported" \
     -v h2c -l h2c
 
 # commit web
-core_call_default command_commit
+command_commit
 
 ### root ###
 on_main(){
@@ -42,23 +42,23 @@ on_main(){
     echo "args[${#@}]=($@)"
 }
 # define root
-core_call_default command_begin --name "`basename $BASH_SOURCE`" \
+command_begin --name "`basename $BASH_SOURCE`" \
     --short 'Example of subcommand for command.sh' \
     --func on_main
 root=$result
 
 # define flags of root
-core_call_default command_flags -d "display version" \
+command_flags -d "display version" \
     -v version -l version -s v
-core_call_default command_flags -t strings -d "display tag" \
+command_flags -t strings -d "display tag" \
     -v tag -s t \
     -V t1 -V t2
 
 # set subcommand 
-core_call_default command_children "$web"
+command_children "$web"
 
 # commit root
-core_call_default command_commit
+command_commit
 
 # parse and execute
-core_call_default command_execute "$root" "$@"
+command_execute "$root" "$@"

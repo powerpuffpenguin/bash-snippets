@@ -81,20 +81,20 @@ on_main(){
     echo "args[${#@}]=($@)"
 }
 # define root
-core_call_default command_begin --name "`basename $BASH_SOURCE`" \
+command_begin --name "`basename $BASH_SOURCE`" \
     --short 'Example of subcommand for command.sh' \
     --func on_main
 root=$result
 
 # define flags of root
-core_call_default command_flags -d "display version" \
+command_flags -d "display version" \
     -v version -l version -s v
 
 # set subcommand 
-core_call_default command_children "$web" "$client"
+command_children "$web" "$client"
 
 # commit root
-core_call_default command_commit
+command_commit
 
 # parse and execute
 command_execute "$root" "$@"
